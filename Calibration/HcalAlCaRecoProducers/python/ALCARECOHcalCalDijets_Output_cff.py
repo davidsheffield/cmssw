@@ -9,7 +9,7 @@ OutALCARECOHcalCalDijets_noDrop = cms.PSet(
         SelectEvents = cms.vstring('pathALCARECOHcalCalDijets')
     ),
     outputCommands = cms.untracked.vstring( 
-        'keep *_DiJProd_*_*',
+        'keep *_DiJetsProd_*_*',
 	'keep triggerTriggerEvent_*_*_*')
 )
 
