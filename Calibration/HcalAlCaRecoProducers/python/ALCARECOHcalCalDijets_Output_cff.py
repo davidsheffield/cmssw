@@ -14,7 +14,8 @@ OutALCARECOHcalCalDijets_noDrop = cms.PSet(
         'keep *_particleFlow_*_*',
         'keep recoPFBlocks_particleFlowBlock_*_*',
         'keep recoPFClusters_*_*_*',
-        'keep *_fixedGridRhoFastjetAll_*_*')
+        'keep *_fixedGridRhoFastjetAll_*_*',
+        'keep recoTracks_generalTracks_*_*')
 )
 
 import copy
