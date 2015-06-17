@@ -1,0 +1,26 @@
+<lcgdict>
+ <class name="ScoutingCaloJet" ClassVersion="10">
+     <version ClassVersion="10" checksum="1216095485"/>
+ </class>
+ <class name="ScoutingPFJet" ClassVersion="10">
+     <version ClassVersion="10" checksum="888124719"/>
+ </class>
+ <class name="ScoutingPFCandidate" ClassVersion="10">
+     <version ClassVersion="10" checksum="2045538435"/>
+ </class>
+ <class name="ScoutingBeamSpot" ClassVersion="10">
+     <version ClassVersion="10" checksum="2089725907"/>
+ </class>
+ <class name="ScoutingVertex" ClassVersion="10">
+     <version ClassVersion="10" checksum="1976771021"/>
+ </class>
+ <class name="std::vector<ScoutingCaloJet>"/>
+ <class name="std::vector<ScoutingPFJet>"/>
+ <class name="std::vector<ScoutingPFCandidate>"/>
+ <class name="std::vector<ScoutingVertex>"/>
+ <class name="edm::Wrapper<std::vector<ScoutingCaloJet> >"/>
+ <class name="edm::Wrapper<std::vector<ScoutingPFJet> >"/>
+ <class name="edm::Wrapper<std::vector<ScoutingPFCandidate> >"/>
+ <class name="edm::Wrapper<ScoutingBeamSpot>"/>
+ <class name="edm::Wrapper<std::vector<ScoutingVertex> >"/>
+</lcgdict>
