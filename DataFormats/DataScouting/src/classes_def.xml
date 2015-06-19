@@ -1,15 +1,12 @@
 <lcgdict>
  <class name="ScoutingCaloJet" ClassVersion="10">
-     <version ClassVersion="10" checksum="1216095485"/>
+     <version ClassVersion="10" checksum="3783991943"/>
  </class>
  <class name="ScoutingPFJet" ClassVersion="10">
      <version ClassVersion="10" checksum="888124719"/>
  </class>
  <class name="ScoutingPFCandidate" ClassVersion="10">
-     <version ClassVersion="10" checksum="2045538435"/>
- </class>
- <class name="ScoutingBeamSpot" ClassVersion="10">
-     <version ClassVersion="10" checksum="2089725907"/>
+     <version ClassVersion="10" checksum="3630548173"/>
  </class>
  <class name="ScoutingVertex" ClassVersion="10">
      <version ClassVersion="10" checksum="1976771021"/>
@@ -21,6 +18,5 @@
  <class name="edm::Wrapper<std::vector<ScoutingCaloJet> >"/>
  <class name="edm::Wrapper<std::vector<ScoutingPFJet> >"/>
  <class name="edm::Wrapper<std::vector<ScoutingPFCandidate> >"/>
- <class name="edm::Wrapper<ScoutingBeamSpot>"/>
  <class name="edm::Wrapper<std::vector<ScoutingVertex> >"/>
 </lcgdict>

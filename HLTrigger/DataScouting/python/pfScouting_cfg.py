@@ -14,8 +14,13 @@ process.source = cms.Source("PoolSource",
 
 process.scoutingPFProducer = cms.EDProducer('ScoutingPFProducer',
     pfJetCollection = cms.InputTag('hltAK4PFJetsCorrectedSelected'),
+    pfJetTagCollection = cms.InputTag('hltCombinedSecondaryVertexBJetTagsPF'),
     pfCandidateCollection = cms.InputTag('hltPFCandidatesSelected'),
-    vertexCollection = cms.InputTag('hltPixelVertices')
+    vertexCollection = cms.InputTag('hltPixelVertices'),
+
+    pfJetPtCut = cms.double(20),
+    pfJetEtaCut = cms.double(3.0),
+    pfCandidatePtCut = cms.double(0.6)
 )
 
 process.out = cms.OutputModule("PoolOutputModule",

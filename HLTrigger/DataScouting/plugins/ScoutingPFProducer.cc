@@ -29,10 +29,13 @@ Description: Producer for ScoutingPFJets from reco::PFJet objects, ScoutingVerte
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "DataFormats/BTauReco/interface/JetTag.h"
 
 #include "DataFormats/DataScouting/interface/ScoutingPFJet.h"
 #include "DataFormats/DataScouting/interface/ScoutingPFCandidate.h"
 #include "DataFormats/DataScouting/interface/ScoutingVertex.h"
+
+#include "DataFormats/Math/interface/deltaR.h"
 
 class ScoutingPFProducer : public edm::EDProducer {
     public:
@@ -45,8 +48,13 @@ class ScoutingPFProducer : public edm::EDProducer {
         virtual void produce(edm::Event&, const edm::EventSetup&) override;
 
         edm::EDGetTokenT<reco::PFJetCollection> pfJetCollection_;
+        edm::EDGetTokenT<reco::JetTagCollection> pfJetTagCollection_;
         edm::EDGetTokenT<reco::PFCandidateCollection> pfCandidateCollection_;
         edm::EDGetTokenT<reco::VertexCollection> vertexCollection_;
+
+        double pfJetPtCut;
+        double pfJetEtaCut;
+        double pfCandidatePtCut;
 };
 
 //
@@ -54,8 +62,12 @@ class ScoutingPFProducer : public edm::EDProducer {
 //
 ScoutingPFProducer::ScoutingPFProducer(const edm::ParameterSet& iConfig):
     pfJetCollection_(consumes<reco::PFJetCollection>(iConfig.getParameter<edm::InputTag>("pfJetCollection"))),
+    pfJetTagCollection_(consumes<reco::JetTagCollection>(iConfig.getParameter<edm::InputTag>("pfJetTagCollection"))),
     pfCandidateCollection_(consumes<reco::PFCandidateCollection>(iConfig.getParameter<edm::InputTag>("pfCandidateCollection"))),
-    vertexCollection_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertexCollection")))
+    vertexCollection_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertexCollection"))),
+    pfJetPtCut(iConfig.getParameter<double>("pfJetPtCut")),
+    pfJetEtaCut(iConfig.getParameter<double>("pfJetEtaCut")),
+    pfCandidatePtCut(iConfig.getParameter<double>("pfCandidatePtCut"))
 {
     //register products
     produces<ScoutingPFJetCollection>("scoutingPFJets");
@@ -77,6 +89,12 @@ void ScoutingPFProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
         edm::LogError ("ScoutingPFProducer") << "invalid collection: pfJetCollection" << "\n";
         return;
     }
+    //get PF jet tags
+    Handle<reco::JetTagCollection> pfJetTagCollection;
+    if(!iEvent.getByToken(pfJetTagCollection_, pfJetTagCollection)){
+        edm::LogError ("ScoutingPFProducer") << "invalid collection: pfJetTagCollection" << "\n";
+        return;
+    }
     //get PF candidates
     Handle<reco::PFCandidateCollection> pfCandidateCollection;
     if(!iEvent.getByToken(pfCandidateCollection_, pfCandidateCollection)){
@@ -93,19 +111,43 @@ void ScoutingPFProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
     //produce vertices
     std::auto_ptr<ScoutingVertexCollection> outVertices(new ScoutingVertexCollection());
     for(auto &vtx : *vertexCollection){
-        outVertices->push_back(ScoutingVertex());
+        outVertices->push_back(ScoutingVertex(
+                    vtx.x(), vtx.y(), vtx.z(), vtx.zError()
+                    ));
     }
 
     //produce PF candidates
     std::auto_ptr<ScoutingPFCandidateCollection> outPFCandidates(new ScoutingPFCandidateCollection());
     for(auto &cand : *pfCandidateCollection){
-        outPFCandidates->push_back(ScoutingPFCandidate());
+        if(cand.pt() < pfCandidatePtCut) continue;
+        outPFCandidates->push_back(ScoutingPFCandidate(
+                    cand.pt(), cand.eta(), cand.phi(), cand.mass(), cand.pdgId()
+                    ));
     }
     
     //produce PF jets
     std::auto_ptr<ScoutingPFJetCollection> outPFJets(new ScoutingPFJetCollection());
     for(auto &jet : *pfJetCollection){
-        outPFJets->push_back(ScoutingPFJet());
+        if(jet.pt() < pfJetPtCut || fabs(jet.eta()) > pfJetEtaCut) continue;
+        //find the jet tag corresponding to the jet
+        float tagValue = -20;
+        float minDR = 0.1;
+        for(auto &tag : *pfJetTagCollection){
+            float dR = reco::deltaR(jet, *(tag.first));
+            if(dR < minDR){
+                minDR = dR;
+                tagValue = tag.second;
+            }
+        }
+        outPFJets->push_back(ScoutingPFJet(
+                    jet.pt(), jet.eta(), jet.phi(), jet.mass(), jet.jetArea(),
+                    jet.chargedHadronEnergy(), jet.neutralHadronEnergy(), jet.photonEnergy(),
+                    jet.electronEnergy(), jet.muonEnergy(), jet.HFHadronEnergy(), jet.HFEMEnergy(),
+                    jet.chargedHadronMultiplicity(), jet.neutralHadronMultiplicity(), jet.photonMultiplicity(),
+                    jet.electronMultiplicity(), jet.muonMultiplicity(), 
+                    jet.HFHadronMultiplicity(), jet.HFEMMultiplicity(), 
+                    jet.hoEnergy(), tagValue, 0.0, std::vector<int>()
+                    ));
     }
 
     //put output
@@ -118,8 +160,12 @@ void ScoutingPFProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
 void ScoutingPFProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     edm::ParameterSetDescription desc;
     desc.add<edm::InputTag>("pfJetCollection",edm::InputTag("hltAK4PFJets"));
+    desc.add<edm::InputTag>("pfJetTagCollection",edm::InputTag("hltCombinedSecondaryVertexBJetTagsPF"));
     desc.add<edm::InputTag>("pfCandidateCollection", edm::InputTag("hltParticleFlow"));
     desc.add<edm::InputTag>("vertexCollection", edm::InputTag("hltPixelVertices"));
+    desc.add<double>("pfJetPtCut", 20.0);
+    desc.add<double>("pfJetEtaCut", 3.0);
+    desc.add<double>("pfCandidatePtCut", 0.6);
     descriptions.add("scoutingPFJetsProducer", desc);
 }
 

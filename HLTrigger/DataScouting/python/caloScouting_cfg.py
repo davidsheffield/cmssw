@@ -14,7 +14,8 @@ process.source = cms.Source("PoolSource",
 
 process.scoutingCaloProducer = cms.EDProducer('ScoutingCaloProducer',
     caloJetCollection = cms.InputTag('hltAK4CaloJetsCorrectedSelectedIDPassed'),
-    beamSpot = cms.InputTag('hltOnlineBeamSpot')
+    caloJetPtCut = cms.double(20.0),
+    caloJetEtaCut = cms.double(3.0)
 )
 
 process.out = cms.OutputModule("PoolOutputModule",

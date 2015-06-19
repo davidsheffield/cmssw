@@ -25,10 +25,11 @@ Description: Producer for ScoutingCaloJets from reco::CaloJet objects and Scouti
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "DataFormats/JetReco/interface/CaloJet.h"
-#include "DataFormats/BeamSpot/interface/BeamSpot.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
 
 #include "DataFormats/DataScouting/interface/ScoutingCaloJet.h"
-#include "DataFormats/DataScouting/interface/ScoutingBeamSpot.h"
+#include "DataFormats/DataScouting/interface/ScoutingVertex.h"
 
 class ScoutingCaloProducer : public edm::EDProducer {
     public:
@@ -41,7 +42,10 @@ class ScoutingCaloProducer : public edm::EDProducer {
         virtual void produce(edm::Event&, const edm::EventSetup&) override;
 
         edm::EDGetTokenT<reco::CaloJetCollection> caloJetCollection_;
-        edm::EDGetTokenT<reco::BeamSpot> beamSpot_;
+        edm::EDGetTokenT<reco::VertexCollection> vertexCollection_;
+
+        double caloJetPtCut;
+        double caloJetEtaCut;
 };
 
 //
@@ -49,11 +53,13 @@ class ScoutingCaloProducer : public edm::EDProducer {
 //
 ScoutingCaloProducer::ScoutingCaloProducer(const edm::ParameterSet& iConfig):
     caloJetCollection_(consumes<reco::CaloJetCollection>(iConfig.getParameter<edm::InputTag>("caloJetCollection"))),
-    beamSpot_(consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("beamSpot")))
+    vertexCollection_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertexCollection"))),
+    caloJetPtCut(iConfig.getParameter<double>("caloJetPtCut")),
+    caloJetEtaCut(iConfig.getParameter<double>("caloJetEtaCut"))
 {
     //register products
     produces<ScoutingCaloJetCollection>("scoutingCaloJets");
-    produces<ScoutingBeamSpot>("scoutingBeamSpot");
+    produces<ScoutingVertexCollection>("scoutingVertices");
 }
 
 ScoutingCaloProducer::~ScoutingCaloProducer()
@@ -72,37 +78,35 @@ ScoutingCaloProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
         return;
     }
 
-    //get beamspot object
-    Handle<reco::BeamSpot> beamSpot;
-    if(!iEvent.getByToken(beamSpot_, beamSpot)){
-        edm::LogError ("ScoutingCaloProducer") << "invalid collection: beamSpot" << "\n";
-        return;
+    //get vertices
+    Handle<reco::VertexCollection> vertexCollection;
+    std::auto_ptr<ScoutingVertexCollection> outVertices(new ScoutingVertexCollection());
+    if(iEvent.getByToken(vertexCollection_, vertexCollection)){
+        //produce vertices (only if present; otherwise return an empty collection)
+        for(auto &vtx : *vertexCollection){
+            outVertices->push_back(ScoutingVertex(
+                        vtx.x(), vtx.y(), vtx.z(), vtx.zError()
+                        ));
+        }
     }
-
-    //produce beamspot 
-    std::auto_ptr<ScoutingBeamSpot> outBeamSpot(new ScoutingBeamSpot(
-                beamSpot->x0(), beamSpot->y0(), beamSpot->z0(),
-                beamSpot->sigmaZ(), beamSpot->BeamWidthX(), beamSpot->BeamWidthY(),
-                beamSpot->dxdz(), beamSpot->dydz(), 
-                beamSpot->x0Error(), beamSpot->y0Error(), beamSpot->z0Error(), 
-                beamSpot->sigmaZ0Error(), beamSpot->dxdzError(), beamSpot->dydzError(), beamSpot->BeamWidthXError()
-                ));
 
     //produce calo jets
     std::auto_ptr<ScoutingCaloJetCollection> outCaloJets(new ScoutingCaloJetCollection());
     for(auto &jet : *caloJetCollection){
-        outCaloJets->push_back(ScoutingCaloJet(
+        if(jet.pt() > caloJetPtCut && fabs(jet.eta()) < caloJetEtaCut){
+            outCaloJets->push_back(ScoutingCaloJet(
                     jet.pt(), jet.eta(), jet.phi(), jet.mass(),
                     jet.jetArea(), jet.maxEInEmTowers(), jet.maxEInHadTowers(),
                     jet.hadEnergyInHB(), jet.hadEnergyInHE(), jet.hadEnergyInHF(),
                     jet.emEnergyInEB(), jet.emEnergyInEE(), jet.emEnergyInHF(),
                     jet.towersArea(), 0.0
                     ));
+        }
     }
 
     //put output
     iEvent.put(outCaloJets, "scoutingCaloJets");
-    iEvent.put(outBeamSpot, "scoutingBeamSpot");
+    iEvent.put(outVertices, "scoutingVertices");
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
@@ -110,7 +114,9 @@ void
 ScoutingCaloProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     edm::ParameterSetDescription desc;
     desc.add<edm::InputTag>("caloJetCollection",edm::InputTag("hltAK4CaloJets"));
-    desc.add<edm::InputTag>("beamSpot",edm::InputTag("hltOnlineBeamSpot"));
+    desc.add<edm::InputTag>("vertexCollection", edm::InputTag("hltPixelVertices"));
+    desc.add<double>("caloJetPtCut", 20.0);
+    desc.add<double>("caloJetEtaCut", 3.0);
     descriptions.add("scoutingCaloJetsProducer", desc);
 }
 
