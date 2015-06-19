@@ -13,9 +13,9 @@ process.source = cms.Source("PoolSource",
 )
 
 process.scoutingPFProducer = cms.EDProducer('ScoutingPFProducer',
-    pfJetCollection = cms.InputTag('hltAK4PFJetsCorrectedSelected'),
+    pfJetCollection = cms.InputTag('hltAK4PFJetsCorrected'),
     pfJetTagCollection = cms.InputTag('hltCombinedSecondaryVertexBJetTagsPF'),
-    pfCandidateCollection = cms.InputTag('hltPFCandidatesSelected'),
+    pfCandidateCollection = cms.InputTag('hltParticleFlow'),
     vertexCollection = cms.InputTag('hltPixelVertices'),
 
     pfJetPtCut = cms.double(20),

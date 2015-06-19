@@ -119,10 +119,11 @@ void ScoutingPFProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
     //produce PF candidates
     std::auto_ptr<ScoutingPFCandidateCollection> outPFCandidates(new ScoutingPFCandidateCollection());
     for(auto &cand : *pfCandidateCollection){
-        if(cand.pt() < pfCandidatePtCut) continue;
-        outPFCandidates->push_back(ScoutingPFCandidate(
-                    cand.pt(), cand.eta(), cand.phi(), cand.mass(), cand.pdgId()
-                    ));
+        if(cand.pt() > pfCandidatePtCut){
+            outPFCandidates->push_back(ScoutingPFCandidate(
+                        cand.pt(), cand.eta(), cand.phi(), cand.mass(), cand.pdgId()
+                        ));
+        }
     }
     
     //produce PF jets
@@ -139,6 +140,28 @@ void ScoutingPFProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
                 tagValue = tag.second;
             }
         }
+        //get the PF constituents of the jet
+        std::vector<int> candIndices;
+        for(auto &cand : jet.getPFConstituents()){
+            if(cand->pt() > pfCandidatePtCut){
+                //search for the candidate in the collection
+                float minDR = 0.01;
+                int matchIndex = -1;
+                int outIndex = 0;
+                for(auto &outCand : *outPFCandidates){
+                    float dR = sqrt(pow(cand->eta() - outCand.eta_, 2) + pow(cand->phi() - outCand.phi_, 2));
+                    if(dR < minDR){
+                        minDR = dR;
+                        matchIndex = outIndex;
+                    }
+                    if(minDR == 0){
+                        break;
+                    }
+                    outIndex++;
+                }
+                candIndices.push_back(matchIndex);
+            }
+        }
         outPFJets->push_back(ScoutingPFJet(
                     jet.pt(), jet.eta(), jet.phi(), jet.mass(), jet.jetArea(),
                     jet.chargedHadronEnergy(), jet.neutralHadronEnergy(), jet.photonEnergy(),
@@ -146,7 +169,7 @@ void ScoutingPFProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
                     jet.chargedHadronMultiplicity(), jet.neutralHadronMultiplicity(), jet.photonMultiplicity(),
                     jet.electronMultiplicity(), jet.muonMultiplicity(), 
                     jet.HFHadronMultiplicity(), jet.HFEMMultiplicity(), 
-                    jet.hoEnergy(), tagValue, 0.0, std::vector<int>()
+                    jet.hoEnergy(), tagValue, 0.0, candIndices
                     ));
     }
 

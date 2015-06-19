@@ -13,7 +13,8 @@ process.source = cms.Source("PoolSource",
 )
 
 process.scoutingCaloProducer = cms.EDProducer('ScoutingCaloProducer',
-    caloJetCollection = cms.InputTag('hltAK4CaloJetsCorrectedSelectedIDPassed'),
+    caloJetCollection = cms.InputTag('hltAK4CaloJetsCorrectedIDPassed'),
+    vertexCollection = cms.InputTag('hltPixelVertices'),
     caloJetPtCut = cms.double(20.0),
     caloJetEtaCut = cms.double(3.0)
 )
