@@ -5,7 +5,7 @@
 // 
 /**\class ScoutingPFProducer ScoutingPFProducer.cc HLTrigger/DataScouting/plugins/ScoutingPFProducer.cc
 
-Description: Producer for ScoutingPFJets from reco::PFJet objects, ScoutingVertexs from reco::Vertexs and ScoutingPFCandidates from reco::PFCandidates
+Description: Producer for ScoutingPFJets from reco::PFJet objects, ScoutingVertexs from reco::Vertexs and ScoutingParticles from reco::PFCandidates
 
 */
 //
@@ -32,7 +32,7 @@ Description: Producer for ScoutingPFJets from reco::PFJet objects, ScoutingVerte
 #include "DataFormats/BTauReco/interface/JetTag.h"
 
 #include "DataFormats/DataScouting/interface/ScoutingPFJet.h"
-#include "DataFormats/DataScouting/interface/ScoutingPFCandidate.h"
+#include "DataFormats/DataScouting/interface/ScoutingParticle.h"
 #include "DataFormats/DataScouting/interface/ScoutingVertex.h"
 
 #include "DataFormats/Math/interface/deltaR.h"
@@ -71,7 +71,7 @@ ScoutingPFProducer::ScoutingPFProducer(const edm::ParameterSet& iConfig):
 {
     //register products
     produces<ScoutingPFJetCollection>("scoutingPFJets");
-    produces<ScoutingPFCandidateCollection>("scoutingPFCandidates");
+    produces<ScoutingParticleCollection>("scoutingPFCandidates");
     produces<ScoutingVertexCollection>("scoutingVertices");
 }
 
@@ -111,18 +111,18 @@ void ScoutingPFProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
     //produce vertices
     std::auto_ptr<ScoutingVertexCollection> outVertices(new ScoutingVertexCollection());
     for(auto &vtx : *vertexCollection){
-        outVertices->push_back(ScoutingVertex(
+        outVertices->emplace_back(
                     vtx.x(), vtx.y(), vtx.z(), vtx.zError()
-                    ));
+                    );
     }
 
     //produce PF candidates
-    std::auto_ptr<ScoutingPFCandidateCollection> outPFCandidates(new ScoutingPFCandidateCollection());
+    std::auto_ptr<ScoutingParticleCollection> outPFCandidates(new ScoutingParticleCollection());
     for(auto &cand : *pfCandidateCollection){
         if(cand.pt() > pfCandidatePtCut){
-            outPFCandidates->push_back(ScoutingPFCandidate(
+            outPFCandidates->emplace_back(
                         cand.pt(), cand.eta(), cand.phi(), cand.mass(), cand.pdgId()
-                        ));
+                        );
         }
     }
     
@@ -149,7 +149,7 @@ void ScoutingPFProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
                 int matchIndex = -1;
                 int outIndex = 0;
                 for(auto &outCand : *outPFCandidates){
-                    float dR = sqrt(pow(cand->eta() - outCand.eta_, 2) + pow(cand->phi() - outCand.phi_, 2));
+                    float dR = sqrt(pow(cand->eta() - outCand.eta(), 2) + pow(cand->phi() - outCand.phi(), 2));
                     if(dR < minDR){
                         minDR = dR;
                         matchIndex = outIndex;
@@ -162,7 +162,7 @@ void ScoutingPFProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
                 candIndices.push_back(matchIndex);
             }
         }
-        outPFJets->push_back(ScoutingPFJet(
+        outPFJets->emplace_back(
                     jet.pt(), jet.eta(), jet.phi(), jet.mass(), jet.jetArea(),
                     jet.chargedHadronEnergy(), jet.neutralHadronEnergy(), jet.photonEnergy(),
                     jet.electronEnergy(), jet.muonEnergy(), jet.HFHadronEnergy(), jet.HFEMEnergy(),
@@ -170,7 +170,7 @@ void ScoutingPFProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
                     jet.electronMultiplicity(), jet.muonMultiplicity(), 
                     jet.HFHadronMultiplicity(), jet.HFEMMultiplicity(), 
                     jet.hoEnergy(), tagValue, 0.0, candIndices
-                    ));
+                    );
     }
 
     //put output

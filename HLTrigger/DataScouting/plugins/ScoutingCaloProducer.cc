@@ -84,9 +84,9 @@ ScoutingCaloProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     if(iEvent.getByToken(vertexCollection_, vertexCollection)){
         //produce vertices (only if present; otherwise return an empty collection)
         for(auto &vtx : *vertexCollection){
-            outVertices->push_back(ScoutingVertex(
+            outVertices->emplace_back(
                         vtx.x(), vtx.y(), vtx.z(), vtx.zError()
-                        ));
+                        );
         }
     }
 
@@ -94,13 +94,13 @@ ScoutingCaloProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     std::auto_ptr<ScoutingCaloJetCollection> outCaloJets(new ScoutingCaloJetCollection());
     for(auto &jet : *caloJetCollection){
         if(jet.pt() > caloJetPtCut && fabs(jet.eta()) < caloJetEtaCut){
-            outCaloJets->push_back(ScoutingCaloJet(
+            outCaloJets->emplace_back(
                     jet.pt(), jet.eta(), jet.phi(), jet.mass(),
                     jet.jetArea(), jet.maxEInEmTowers(), jet.maxEInHadTowers(),
                     jet.hadEnergyInHB(), jet.hadEnergyInHE(), jet.hadEnergyInHF(),
                     jet.emEnergyInEB(), jet.emEnergyInEE(), jet.emEnergyInHF(),
                     jet.towersArea(), 0.0
-                    ));
+                    );
         }
     }
 

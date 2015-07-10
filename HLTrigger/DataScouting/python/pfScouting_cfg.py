@@ -8,7 +8,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-        'file:outputScoutingParticleFlowDST.root'
+        'file:outputPFScouting.root'
     )
 )
 
