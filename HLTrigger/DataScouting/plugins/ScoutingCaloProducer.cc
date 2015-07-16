@@ -27,8 +27,8 @@ Description: Producer for ScoutingCaloJets from reco::CaloJet objects and Scouti
 #include "DataFormats/JetReco/interface/CaloJet.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
-#include "DataFormats/METReco/interface/METCollection.h"
-#include "DataFormats/METReco/interface/MET.h"
+#include "DataFormats/METReco/interface/CaloMETCollection.h"
+#include "DataFormats/METReco/interface/CaloMET.h"
 
 #include "DataFormats/DataScouting/interface/ScoutingCaloJet.h"
 #include "DataFormats/DataScouting/interface/ScoutingVertex.h"
@@ -45,7 +45,7 @@ class ScoutingCaloProducer : public edm::EDProducer {
 
         edm::EDGetTokenT<reco::CaloJetCollection> caloJetCollection_;
         edm::EDGetTokenT<reco::VertexCollection> vertexCollection_;
-        edm::EDGetTokenT<reco::METCollection> metCollection_;
+        edm::EDGetTokenT<reco::CaloMETCollection> metCollection_;
         edm::EDGetTokenT<double> rho_;
 
         double caloJetPtCut;
@@ -60,7 +60,7 @@ class ScoutingCaloProducer : public edm::EDProducer {
 ScoutingCaloProducer::ScoutingCaloProducer(const edm::ParameterSet& iConfig):
     caloJetCollection_(consumes<reco::CaloJetCollection>(iConfig.getParameter<edm::InputTag>("caloJetCollection"))),
     vertexCollection_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertexCollection"))),
-    metCollection_(consumes<reco::METCollection>(iConfig.getParameter<edm::InputTag>("metCollection"))),
+    metCollection_(consumes<reco::CaloMETCollection>(iConfig.getParameter<edm::InputTag>("metCollection"))),
     rho_(consumes<double>(iConfig.getParameter<edm::InputTag>("rho"))),
     caloJetPtCut(iConfig.getParameter<double>("caloJetPtCut")),
     caloJetEtaCut(iConfig.getParameter<double>("caloJetEtaCut")),
@@ -111,7 +111,7 @@ ScoutingCaloProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     std::auto_ptr<double> outRho(new double(*rho));
 
     //get MET 
-    Handle<reco::METCollection> metCollection;
+    Handle<reco::CaloMETCollection> metCollection;
     if(doMet && !iEvent.getByToken(metCollection_, metCollection)){
         edm::LogError ("ScoutingCaloProducer") << "invalid collection: metCollection" << "\n";
         return;

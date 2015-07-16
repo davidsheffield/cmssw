@@ -25,8 +25,8 @@ Description: Producer for ScoutingPFJets from reco::PFJet objects, ScoutingVerte
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "DataFormats/JetReco/interface/PFJet.h"
-#include "DataFormats/METReco/interface/PFMET.h"
-#include "DataFormats/METReco/interface/PFMETCollection.h"
+#include "DataFormats/METReco/interface/MET.h"
+#include "DataFormats/METReco/interface/METCollection.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -53,7 +53,7 @@ class ScoutingPFProducer : public edm::EDProducer {
         edm::EDGetTokenT<reco::JetTagCollection> pfJetTagCollection_;
         edm::EDGetTokenT<reco::PFCandidateCollection> pfCandidateCollection_;
         edm::EDGetTokenT<reco::VertexCollection> vertexCollection_;
-        edm::EDGetTokenT<reco::PFMETCollection> metCollection_;
+        edm::EDGetTokenT<reco::METCollection> metCollection_;
         edm::EDGetTokenT<double> rho_;
 
         double pfJetPtCut;
@@ -73,7 +73,7 @@ ScoutingPFProducer::ScoutingPFProducer(const edm::ParameterSet& iConfig):
     pfJetTagCollection_(consumes<reco::JetTagCollection>(iConfig.getParameter<edm::InputTag>("pfJetTagCollection"))),
     pfCandidateCollection_(consumes<reco::PFCandidateCollection>(iConfig.getParameter<edm::InputTag>("pfCandidateCollection"))),
     vertexCollection_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertexCollection"))),
-    metCollection_(consumes<reco::PFMETCollection>(iConfig.getParameter<edm::InputTag>("metCollection"))),
+    metCollection_(consumes<reco::METCollection>(iConfig.getParameter<edm::InputTag>("metCollection"))),
     rho_(consumes<double>(iConfig.getParameter<edm::InputTag>("rho"))),
     pfJetPtCut(iConfig.getParameter<double>("pfJetPtCut")),
     pfJetEtaCut(iConfig.getParameter<double>("pfJetEtaCut")),
@@ -131,7 +131,7 @@ void ScoutingPFProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
     }
     std::auto_ptr<double> outRho(new double(*rho));
     //get MET
-    Handle<reco::PFMETCollection> metCollection;
+    Handle<reco::METCollection> metCollection;
     if(doMet && !iEvent.getByToken(metCollection_, metCollection)){
         edm::LogError ("ScoutingPFProducer") << "invalid collection: metCollection" << "\n";
         return;
@@ -223,7 +223,7 @@ void ScoutingPFProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
     iEvent.put(outPFCandidates, "scoutingPFCandidates");
     iEvent.put(outPFJets, "scoutingPFJets");
     iEvent.put(outRho, "rho");
-    iEvent.put(outMetPt, "pfMetPf");
+    iEvent.put(outMetPt, "pfMetPt");
     iEvent.put(outMetPhi, "pfMetPhi");
 }
 
