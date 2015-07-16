@@ -27,6 +27,8 @@ Description: Producer for ScoutingCaloJets from reco::CaloJet objects and Scouti
 #include "DataFormats/JetReco/interface/CaloJet.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "DataFormats/METReco/interface/METCollection.h"
+#include "DataFormats/METReco/interface/MET.h"
 
 #include "DataFormats/DataScouting/interface/ScoutingCaloJet.h"
 #include "DataFormats/DataScouting/interface/ScoutingVertex.h"
@@ -43,9 +45,13 @@ class ScoutingCaloProducer : public edm::EDProducer {
 
         edm::EDGetTokenT<reco::CaloJetCollection> caloJetCollection_;
         edm::EDGetTokenT<reco::VertexCollection> vertexCollection_;
+        edm::EDGetTokenT<reco::METCollection> metCollection_;
+        edm::EDGetTokenT<double> rho_;
 
         double caloJetPtCut;
         double caloJetEtaCut;
+
+        bool doMet;
 };
 
 //
@@ -54,12 +60,18 @@ class ScoutingCaloProducer : public edm::EDProducer {
 ScoutingCaloProducer::ScoutingCaloProducer(const edm::ParameterSet& iConfig):
     caloJetCollection_(consumes<reco::CaloJetCollection>(iConfig.getParameter<edm::InputTag>("caloJetCollection"))),
     vertexCollection_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertexCollection"))),
+    metCollection_(consumes<reco::METCollection>(iConfig.getParameter<edm::InputTag>("metCollection"))),
+    rho_(consumes<double>(iConfig.getParameter<edm::InputTag>("rho"))),
     caloJetPtCut(iConfig.getParameter<double>("caloJetPtCut")),
-    caloJetEtaCut(iConfig.getParameter<double>("caloJetEtaCut"))
+    caloJetEtaCut(iConfig.getParameter<double>("caloJetEtaCut")),
+    doMet(iConfig.getParameter<bool>("doMet"))
 {
     //register products
     produces<ScoutingCaloJetCollection>("scoutingCaloJets");
     produces<ScoutingVertexCollection>("scoutingVertices");
+    produces<double>("rho");
+    produces<double>("caloMetPt");
+    produces<double>("caloMetPhi");
 }
 
 ScoutingCaloProducer::~ScoutingCaloProducer()
@@ -90,6 +102,21 @@ ScoutingCaloProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
         }
     }
 
+    //get rho
+    Handle<double>rho;
+    if(!iEvent.getByToken(rho_, rho)){
+        edm::LogError ("ScoutingCaloProducer") << "invalid collection: rho" << "\n";
+        return;
+    }
+    std::auto_ptr<double> outRho(new double(*rho));
+
+    //get MET 
+    Handle<reco::METCollection> metCollection;
+    if(doMet && !iEvent.getByToken(metCollection_, metCollection)){
+        edm::LogError ("ScoutingCaloProducer") << "invalid collection: metCollection" << "\n";
+        return;
+    }
+
     //produce calo jets
     std::auto_ptr<ScoutingCaloJetCollection> outCaloJets(new ScoutingCaloJetCollection());
     for(auto &jet : *caloJetCollection){
@@ -104,9 +131,22 @@ ScoutingCaloProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
         }
     }
 
+    //produce MET
+    double metPt = -999;
+    double metPhi = -999;
+    if(doMet){
+        metPt = metCollection->front().pt();
+        metPhi = metCollection->front().phi();
+    }
+    std::auto_ptr<double> outMetPt(new double(metPt));
+    std::auto_ptr<double> outMetPhi(new double(metPhi));
+
     //put output
     iEvent.put(outCaloJets, "scoutingCaloJets");
     iEvent.put(outVertices, "scoutingVertices");
+    iEvent.put(outRho, "rho");
+    iEvent.put(outMetPt, "caloMetPt");
+    iEvent.put(outMetPhi, "caloMetPhi");
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
@@ -115,8 +155,11 @@ ScoutingCaloProducer::fillDescriptions(edm::ConfigurationDescriptions& descripti
     edm::ParameterSetDescription desc;
     desc.add<edm::InputTag>("caloJetCollection",edm::InputTag("hltAK4CaloJets"));
     desc.add<edm::InputTag>("vertexCollection", edm::InputTag("hltPixelVertices"));
+    desc.add<edm::InputTag>("metCollection", edm::InputTag("hltMetCleanUsingJetID"));
+    desc.add<edm::InputTag>("rho", edm::InputTag("hltFixedGridRhoFastjetAllCalo"));
     desc.add<double>("caloJetPtCut", 20.0);
     desc.add<double>("caloJetEtaCut", 3.0);
+    desc.add<bool>("doMet", true);
     descriptions.add("scoutingCaloJetsProducer", desc);
 }
 

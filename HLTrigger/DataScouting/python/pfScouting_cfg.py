@@ -17,6 +17,8 @@ process.scoutingPFProducer = cms.EDProducer('ScoutingPFProducer',
     pfJetTagCollection = cms.InputTag('hltCombinedSecondaryVertexBJetTagsPF'),
     pfCandidateCollection = cms.InputTag('hltParticleFlow'),
     vertexCollection = cms.InputTag('hltPixelVertices'),
+    metCollection = cms.InputTag('hltPFMETProducer'),
+    rho = cms.InputTag('hltFixedGridRhoFastjetAll'),
 
     pfJetPtCut = cms.double(20),
     pfJetEtaCut = cms.double(3.0),

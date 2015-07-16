@@ -15,6 +15,8 @@ process.source = cms.Source("PoolSource",
 process.scoutingCaloProducer = cms.EDProducer('ScoutingCaloProducer',
     caloJetCollection = cms.InputTag('hltAK4CaloJetsCorrectedIDPassed'),
     vertexCollection = cms.InputTag('hltPixelVertices'),
+    metCollection = cms.InputTag('hltMetCleanUsingJetID'),
+    rho = cms.InputTag('hltFixedGridRhoFastjetAllCalo'),
     caloJetPtCut = cms.double(20.0),
     caloJetEtaCut = cms.double(3.0)
 )

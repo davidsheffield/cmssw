@@ -25,6 +25,8 @@ Description: Producer for ScoutingPFJets from reco::PFJet objects, ScoutingVerte
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "DataFormats/JetReco/interface/PFJet.h"
+#include "DataFormats/METReco/interface/PFMET.h"
+#include "DataFormats/METReco/interface/PFMETCollection.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -51,6 +53,8 @@ class ScoutingPFProducer : public edm::EDProducer {
         edm::EDGetTokenT<reco::JetTagCollection> pfJetTagCollection_;
         edm::EDGetTokenT<reco::PFCandidateCollection> pfCandidateCollection_;
         edm::EDGetTokenT<reco::VertexCollection> vertexCollection_;
+        edm::EDGetTokenT<reco::PFMETCollection> metCollection_;
+        edm::EDGetTokenT<double> rho_;
 
         double pfJetPtCut;
         double pfJetEtaCut;
@@ -58,7 +62,7 @@ class ScoutingPFProducer : public edm::EDProducer {
 
         bool doJetTags;
         bool doCandidates;
-        bool doVertices;
+        bool doMet;
 };
 
 //
@@ -69,17 +73,22 @@ ScoutingPFProducer::ScoutingPFProducer(const edm::ParameterSet& iConfig):
     pfJetTagCollection_(consumes<reco::JetTagCollection>(iConfig.getParameter<edm::InputTag>("pfJetTagCollection"))),
     pfCandidateCollection_(consumes<reco::PFCandidateCollection>(iConfig.getParameter<edm::InputTag>("pfCandidateCollection"))),
     vertexCollection_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertexCollection"))),
+    metCollection_(consumes<reco::PFMETCollection>(iConfig.getParameter<edm::InputTag>("metCollection"))),
+    rho_(consumes<double>(iConfig.getParameter<edm::InputTag>("rho"))),
     pfJetPtCut(iConfig.getParameter<double>("pfJetPtCut")),
     pfJetEtaCut(iConfig.getParameter<double>("pfJetEtaCut")),
     pfCandidatePtCut(iConfig.getParameter<double>("pfCandidatePtCut")),
     doJetTags(iConfig.getParameter<bool>("doJetTags")),
     doCandidates(iConfig.getParameter<bool>("doCandidates")),
-    doVertices(iConfig.getParameter<bool>("doVertices"))
+    doMet(iConfig.getParameter<bool>("doMet"))
 {
     //register products
     produces<ScoutingPFJetCollection>("scoutingPFJets");
     produces<ScoutingParticleCollection>("scoutingPFCandidates");
     produces<ScoutingVertexCollection>("scoutingVertices");
+    produces<double>("rho");
+    produces<double>("pfMetPt");
+    produces<double>("pfMetPhi");
 }
 
 ScoutingPFProducer::~ScoutingPFProducer()
@@ -110,19 +119,30 @@ void ScoutingPFProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
     }
     //get vertices
     Handle<reco::VertexCollection> vertexCollection;
-    if(doVertices && !iEvent.getByToken(vertexCollection_, vertexCollection)){
+    if(!iEvent.getByToken(vertexCollection_, vertexCollection)){
         edm::LogError ("ScoutingPFProducer") << "invalid collection: vertexCollection" << "\n";
+        return;
+    }
+    //get rho
+    Handle<double> rho;
+    if(!iEvent.getByToken(rho_, rho)){
+        edm::LogError ("ScoutingPFProducer") << "invalid collection: rho" << "\n";
+        return;
+    }
+    std::auto_ptr<double> outRho(new double(*rho));
+    //get MET
+    Handle<reco::PFMETCollection> metCollection;
+    if(doMet && !iEvent.getByToken(metCollection_, metCollection)){
+        edm::LogError ("ScoutingPFProducer") << "invalid collection: metCollection" << "\n";
         return;
     }
 
     //produce vertices
     std::auto_ptr<ScoutingVertexCollection> outVertices(new ScoutingVertexCollection());
-    if(doVertices){
-        for(auto &vtx : *vertexCollection){
-            outVertices->emplace_back(
-                    vtx.x(), vtx.y(), vtx.z(), vtx.zError()
-                    );
-        }
+    for(auto &vtx : *vertexCollection){
+        outVertices->emplace_back(
+                vtx.x(), vtx.y(), vtx.z(), vtx.zError()
+                );
     }
 
     //produce PF candidates
@@ -188,10 +208,23 @@ void ScoutingPFProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
                     );
     }
 
+    double metPt = -999;
+    double metPhi = -999;
+    if(doMet){
+        metPt = metCollection->front().pt();
+        metPhi = metCollection->front().phi();
+    }
+    std::auto_ptr<double> outMetPt(new double(metPt));
+    std::auto_ptr<double> outMetPhi(new double(metPhi));
+
+
     //put output
     iEvent.put(outVertices, "scoutingVertices");
     iEvent.put(outPFCandidates, "scoutingPFCandidates");
     iEvent.put(outPFJets, "scoutingPFJets");
+    iEvent.put(outRho, "rho");
+    iEvent.put(outMetPt, "pfMetPf");
+    iEvent.put(outMetPhi, "pfMetPhi");
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
@@ -201,12 +234,14 @@ void ScoutingPFProducer::fillDescriptions(edm::ConfigurationDescriptions& descri
     desc.add<edm::InputTag>("pfJetTagCollection",edm::InputTag("hltCombinedSecondaryVertexBJetTagsPF"));
     desc.add<edm::InputTag>("pfCandidateCollection", edm::InputTag("hltParticleFlow"));
     desc.add<edm::InputTag>("vertexCollection", edm::InputTag("hltPixelVertices"));
+    desc.add<edm::InputTag>("metCollection", edm::InputTag("hltPFMETProducer"));
+    desc.add<edm::InputTag>("rho", edm::InputTag("hltFixedGridRhoFastjetAll"));
     desc.add<double>("pfJetPtCut", 20.0);
     desc.add<double>("pfJetEtaCut", 3.0);
     desc.add<double>("pfCandidatePtCut", 0.6);
     desc.add<bool>("doJetTags", true);
     desc.add<bool>("doCandidates", true);
-    desc.add<bool>("doVertices", true);
+    desc.add<bool>("doMet", true);
     descriptions.add("scoutingPFJetsProducer", desc);
 }
 
