@@ -78,4 +78,24 @@
   </class>
   <class name="edm::Wrapper<trigger::HLTPrescaleTable>"/>
 
+  <class name="ScoutingCaloJet" ClassVersion="10">
+      <version ClassVersion="10" checksum="3783991943"/>
+  </class>
+  <class name="ScoutingPFJet" ClassVersion="10">
+      <version ClassVersion="10" checksum="888124719"/>
+  </class>
+  <class name="ScoutingParticle" ClassVersion="10">
+      <version ClassVersion="10" checksum="2803573918"/>
+  </class>
+  <class name="ScoutingVertex" ClassVersion="10">
+      <version ClassVersion="10" checksum="1976771021"/>
+  </class>
+  <class name="std::vector<ScoutingCaloJet>"/>
+  <class name="std::vector<ScoutingPFJet>"/>
+  <class name="std::vector<ScoutingParticle>"/>
+  <class name="std::vector<ScoutingVertex>"/>
+  <class name="edm::Wrapper<std::vector<ScoutingCaloJet> >"/>
+  <class name="edm::Wrapper<std::vector<ScoutingPFJet> >"/>
+  <class name="edm::Wrapper<std::vector<ScoutingParticle> >"/>
+  <class name="edm::Wrapper<std::vector<ScoutingVertex> >"/>
 </lcgdict>
