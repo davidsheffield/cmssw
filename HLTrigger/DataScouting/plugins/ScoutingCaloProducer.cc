@@ -33,7 +33,7 @@ Description: Producer for ScoutingCaloJets from reco::CaloJet objects and Scouti
 #include "DataFormats/DataScouting/interface/ScoutingCaloJet.h"
 #include "DataFormats/DataScouting/interface/ScoutingVertex.h"
 
-class ScoutingCaloProducer : public edm::EDProducer {
+class ScoutingCaloProducer : public edm::stream::EDProducer<> {
     public:
         explicit ScoutingCaloProducer(const edm::ParameterSet&);
         ~ScoutingCaloProducer();

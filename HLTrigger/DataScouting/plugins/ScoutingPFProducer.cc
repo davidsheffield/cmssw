@@ -39,7 +39,7 @@ Description: Producer for ScoutingPFJets from reco::PFJet objects, ScoutingVerte
 
 #include "DataFormats/Math/interface/deltaR.h"
 
-class ScoutingPFProducer : public edm::EDProducer {
+class ScoutingPFProducer : public edm::stream::EDProducer<> {
     public:
         explicit ScoutingPFProducer(const edm::ParameterSet&);
         ~ScoutingPFProducer();
