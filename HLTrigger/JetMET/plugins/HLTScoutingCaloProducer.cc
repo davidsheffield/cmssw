@@ -30,8 +30,8 @@ Description: Producer for ScoutingCaloJets from reco::CaloJet objects
 #include "DataFormats/METReco/interface/CaloMETCollection.h"
 #include "DataFormats/METReco/interface/CaloMET.h"
 
-#include "DataFormats/DataScouting/interface/ScoutingCaloJet.h"
-#include "DataFormats/DataScouting/interface/ScoutingVertex.h"
+#include "DataFormats/HLTReco/interface/ScoutingCaloJet.h"
+#include "DataFormats/HLTReco/interface/ScoutingVertex.h"
 
 class HLTScoutingCaloProducer : public edm::stream::EDProducer<> {
     public:

@@ -33,9 +33,9 @@ Description: Producer for ScoutingPFJets from reco::PFJet objects, ScoutingVerte
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/BTauReco/interface/JetTag.h"
 
-#include "DataFormats/DataScouting/interface/ScoutingPFJet.h"
-#include "DataFormats/DataScouting/interface/ScoutingParticle.h"
-#include "DataFormats/DataScouting/interface/ScoutingVertex.h"
+#include "DataFormats/HLTReco/interface/ScoutingPFJet.h"
+#include "DataFormats/HLTReco/interface/ScoutingParticle.h"
+#include "DataFormats/HLTReco/interface/ScoutingVertex.h"
 
 #include "DataFormats/Math/interface/deltaR.h"
 
