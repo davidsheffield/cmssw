@@ -5,7 +5,7 @@
 // 
 /**\class HLTScoutingCaloProducer HLTScoutingCaloProducer.cc HLTrigger/JetMET/plugins/HLTScoutingCaloProducer.cc
 
-Description: Producer for ScoutingCaloJets from reco::CaloJet objects and ScoutingBeamSpot from reco::BeamSpot
+Description: Producer for ScoutingCaloJets from reco::CaloJet objects
 
 */
 //
