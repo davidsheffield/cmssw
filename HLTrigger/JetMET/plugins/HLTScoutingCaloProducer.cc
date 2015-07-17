@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
-// Package:    HLTrigger/DataScouting
-// Class:      ScoutingCaloProducer
+// Package:    HLTrigger/JetMET
+// Class:      HLTScoutingCaloProducer
 // 
-/**\class ScoutingCaloProducer ScoutingCaloProducer.cc HLTrigger/DataScouting/plugins/ScoutingCaloProducer.cc
+/**\class HLTScoutingCaloProducer HLTScoutingCaloProducer.cc HLTrigger/JetMET/plugins/HLTScoutingCaloProducer.cc
 
 Description: Producer for ScoutingCaloJets from reco::CaloJet objects and ScoutingBeamSpot from reco::BeamSpot
 
@@ -33,10 +33,10 @@ Description: Producer for ScoutingCaloJets from reco::CaloJet objects and Scouti
 #include "DataFormats/DataScouting/interface/ScoutingCaloJet.h"
 #include "DataFormats/DataScouting/interface/ScoutingVertex.h"
 
-class ScoutingCaloProducer : public edm::stream::EDProducer<> {
+class HLTScoutingCaloProducer : public edm::stream::EDProducer<> {
     public:
-        explicit ScoutingCaloProducer(const edm::ParameterSet&);
-        ~ScoutingCaloProducer();
+        explicit HLTScoutingCaloProducer(const edm::ParameterSet&);
+        ~HLTScoutingCaloProducer();
 
         static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
@@ -57,7 +57,7 @@ class ScoutingCaloProducer : public edm::stream::EDProducer<> {
 //
 // constructors and destructor
 //
-ScoutingCaloProducer::ScoutingCaloProducer(const edm::ParameterSet& iConfig):
+HLTScoutingCaloProducer::HLTScoutingCaloProducer(const edm::ParameterSet& iConfig):
     caloJetCollection_(consumes<reco::CaloJetCollection>(iConfig.getParameter<edm::InputTag>("caloJetCollection"))),
     vertexCollection_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertexCollection"))),
     metCollection_(consumes<reco::CaloMETCollection>(iConfig.getParameter<edm::InputTag>("metCollection"))),
@@ -74,19 +74,19 @@ ScoutingCaloProducer::ScoutingCaloProducer(const edm::ParameterSet& iConfig):
     produces<double>("caloMetPhi");
 }
 
-ScoutingCaloProducer::~ScoutingCaloProducer()
+HLTScoutingCaloProducer::~HLTScoutingCaloProducer()
 { }
 
 // ------------ method called to produce the data  ------------
     void
-ScoutingCaloProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
+HLTScoutingCaloProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
     using namespace edm;
 
     //get calo jets
     Handle<reco::CaloJetCollection> caloJetCollection;
     if(!iEvent.getByToken(caloJetCollection_, caloJetCollection)){
-        edm::LogError ("ScoutingCaloProducer") << "invalid collection: caloJetCollection" << "\n";
+        edm::LogError ("HLTScoutingCaloProducer") << "invalid collection: caloJetCollection" << "\n";
         return;
     }
 
@@ -105,7 +105,7 @@ ScoutingCaloProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     //get rho
     Handle<double>rho;
     if(!iEvent.getByToken(rho_, rho)){
-        edm::LogError ("ScoutingCaloProducer") << "invalid collection: rho" << "\n";
+        edm::LogError ("HLTScoutingCaloProducer") << "invalid collection: rho" << "\n";
         return;
     }
     std::auto_ptr<double> outRho(new double(*rho));
@@ -113,7 +113,7 @@ ScoutingCaloProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     //get MET 
     Handle<reco::CaloMETCollection> metCollection;
     if(doMet && !iEvent.getByToken(metCollection_, metCollection)){
-        edm::LogError ("ScoutingCaloProducer") << "invalid collection: metCollection" << "\n";
+        edm::LogError ("HLTScoutingCaloProducer") << "invalid collection: metCollection" << "\n";
         return;
     }
 
@@ -151,7 +151,7 @@ ScoutingCaloProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void
-ScoutingCaloProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+HLTScoutingCaloProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     edm::ParameterSetDescription desc;
     desc.add<edm::InputTag>("caloJetCollection",edm::InputTag("hltAK4CaloJets"));
     desc.add<edm::InputTag>("vertexCollection", edm::InputTag("hltPixelVertices"));
@@ -164,4 +164,4 @@ ScoutingCaloProducer::fillDescriptions(edm::ConfigurationDescriptions& descripti
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(ScoutingCaloProducer);
+DEFINE_FWK_MODULE(HLTScoutingCaloProducer);
