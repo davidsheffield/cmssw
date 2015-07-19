@@ -5,6 +5,10 @@
 #include "DataFormats/HLTReco/interface/TriggerEvent.h"
 #include "DataFormats/HLTReco/interface/TriggerEventWithRefs.h"
 #include "DataFormats/HLTReco/interface/HLTPrescaleTable.h"
+#include "DataFormats/HLTReco/interface/ScoutingCaloJet.h"
+#include "DataFormats/HLTReco/interface/ScoutingPFJet.h"
+#include "DataFormats/HLTReco/interface/ScoutingParticle.h"
+#include "DataFormats/HLTReco/interface/ScoutingVertex.h"
 #include "DataFormats/Common/interface/Wrapper.h"
 
 #include "DataFormats/Candidate/interface/CompositeCandidate.h"
@@ -53,5 +57,9 @@ namespace DataFormats_HLTReco {
     trigger::HLTPrescaleTable hpt;
     edm::Wrapper<trigger::HLTPrescaleTable> whpt;
 
+    edm::Wrapper<ScoutingCaloJetCollection> sc1;
+    edm::Wrapper<ScoutingParticleCollection> sc2;
+    edm::Wrapper<ScoutingPFJetCollection> sc3;
+    edm::Wrapper<ScoutingVertexCollection> sc4;
   };
 }
