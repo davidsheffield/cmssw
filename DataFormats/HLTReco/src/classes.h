@@ -9,6 +9,8 @@
 #include "DataFormats/HLTReco/interface/ScoutingPFJet.h"
 #include "DataFormats/HLTReco/interface/ScoutingParticle.h"
 #include "DataFormats/HLTReco/interface/ScoutingVertex.h"
+#include "DataFormats/HLTReco/interface/ScoutingMuon.h"
+#include "DataFormats/HLTReco/interface/ScoutingElectron.h"
 #include "DataFormats/Common/interface/Wrapper.h"
 
 #include "DataFormats/Candidate/interface/CompositeCandidate.h"
@@ -61,5 +63,7 @@ namespace DataFormats_HLTReco {
     edm::Wrapper<ScoutingParticleCollection> sc2;
     edm::Wrapper<ScoutingPFJetCollection> sc3;
     edm::Wrapper<ScoutingVertexCollection> sc4;
+    edm::Wrapper<ScoutingMuonCollection> sc5;
+    edm::Wrapper<ScoutingElectronCollection> sc6;
   };
 }
