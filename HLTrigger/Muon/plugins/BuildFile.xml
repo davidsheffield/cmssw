@@ -1,0 +1,6 @@
+<library   file="*.cc" name="HLTriggerMuonPlugins">
+  <use   name="DataFormats/Common"/>
+  <use   name="DataFormats/HLTReco"/>
+  <use   name="FWCore/Framework"/>
+  <flags   EDM_PLUGIN="1"/>
+</library>
