@@ -90,22 +90,22 @@
   <class name="ScoutingVertex" ClassVersion="10">
       <version ClassVersion="10" checksum="1976771021"/>
   </class>
-  <class name="ScoutingMuon" ClassVersion="10">
-    <version ClassVersion="10" checksum="697825753"/>
+  <class name="HLTScoutingMuon" ClassVersion="2">
+    <version ClassVersion="2" checksum="2015948697"/>
   </class>
-  <class name="ScoutingElectron" ClassVersion="10">
-    <version ClassVersion="10" checksum="2712322306"/>
+  <class name="HLTScoutingElectron" ClassVersion="2">
+    <version ClassVersion="2" checksum="2303307458"/>
   </class>
   <class name="std::vector<ScoutingCaloJet>"/>
   <class name="std::vector<ScoutingPFJet>"/>
   <class name="std::vector<ScoutingParticle>"/>
   <class name="std::vector<ScoutingVertex>"/>
-  <class name="std::vector<ScoutingMuon>"/>
-  <class name="std::vector<ScoutingElectron>"/>
+  <class name="std::vector<HLTScoutingMuon>"/>
+  <class name="std::vector<HLTScoutingElectron>"/>
   <class name="edm::Wrapper<std::vector<ScoutingCaloJet> >"/>
   <class name="edm::Wrapper<std::vector<ScoutingPFJet> >"/>
   <class name="edm::Wrapper<std::vector<ScoutingParticle> >"/>
   <class name="edm::Wrapper<std::vector<ScoutingVertex> >"/>
-  <class name="edm::Wrapper<std::vector<ScoutingMuon> >"/>
-  <class name="edm::Wrapper<std::vector<ScoutingElectron> >"/>
+  <class name="edm::Wrapper<std::vector<HLTScoutingMuon> >"/>
+  <class name="edm::Wrapper<std::vector<HLTScoutingElectron> >"/>
 </lcgdict>

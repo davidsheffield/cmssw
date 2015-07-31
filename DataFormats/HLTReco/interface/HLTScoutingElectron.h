@@ -1,15 +1,15 @@
-#ifndef DataFormats_ScoutingElectron_h
-#define DataFormats_ScoutingElectron_h
+#ifndef DataFormats_HLTScoutingElectron_h
+#define DataFormats_HLTScoutingElectron_h
 
 #include <vector>
 
 //class for holding electron information, for use in data scouting 
 //IMPORTANT: the content of this class should be changed only in backwards compatible ways!
-class ScoutingElectron
+class HLTScoutingElectron
 {
     public:
         //constructor with values for all data fields
-        ScoutingElectron(float pt, float eta, float phi, float m,
+        HLTScoutingElectron(float pt, float eta, float phi, float m,
                 float d0, float dZ, float dEtaIn, float dPhiIn,
                 float sigmaIetaIeta, float hOverE, float ooEMOop, 
                 int missingHits, int charge,
@@ -20,7 +20,7 @@ class ScoutingElectron
     missingHits_(missingHits), charge_(charge),
     ecalIso_(ecalIso), hcalIso_(hcalIso), trackIso_(trackIso) {}
         //default constructor
-        ScoutingElectron():pt_(0), eta_(0), phi_(0), m_(0), 
+        HLTScoutingElectron():pt_(0), eta_(0), phi_(0), m_(0), 
         d0_(0), dZ_(0), dEtaIn_(0), dPhiIn_(0),
         sigmaIetaIeta_(0), hOverE_(0), ooEMOop_(0),
         missingHits_(0), charge_(0), ecalIso_(0), hcalIso_(0), trackIso_(0) {}
@@ -62,6 +62,6 @@ class ScoutingElectron
         float trackIso_;
 };
 
-typedef std::vector<ScoutingElectron> ScoutingElectronCollection;
+typedef std::vector<HLTScoutingElectron> HLTScoutingElectronCollection;
 
 #endif

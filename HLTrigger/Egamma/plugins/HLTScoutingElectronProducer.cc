@@ -31,7 +31,7 @@ Description: Producer for ScoutingElectron
 #include "DataFormats/RecoCandidate/interface/RecoEcalCandidateFwd.h"
 #include "DataFormats/RecoCandidate/interface/RecoEcalCandidate.h"
 
-#include "DataFormats/HLTReco/interface/ScoutingElectron.h"
+#include "DataFormats/HLTReco/interface/HLTScoutingElectron.h"
 
 class HLTScoutingElectronProducer : public edm::stream::EDProducer<> {
     typedef edm::AssociationMap<edm::OneToValue<std::vector<reco::RecoEcalCandidate>, float,
@@ -88,7 +88,7 @@ HLTScoutingElectronProducer::HLTScoutingElectronProducer(const edm::ParameterSet
     electronEtaCut(iConfig.getParameter<double>("electronEtaCut"))
 {
     //register products
-    produces<ScoutingElectronCollection>("scoutingElectrons");
+    produces<HLTScoutingElectronCollection>("scoutingElectrons");
 }
 
 HLTScoutingElectronProducer::~HLTScoutingElectronProducer()
@@ -190,7 +190,7 @@ void HLTScoutingElectronProducer::produce(edm::Event& iEvent, const edm::EventSe
     }
 
     // Produce electrons
-    std::auto_ptr<ScoutingElectronCollection> outElectrons(new ScoutingElectronCollection());
+    std::auto_ptr<HLTScoutingElectronCollection> outElectrons(new HLTScoutingElectronCollection());
     int index = 0;
     for (auto &electron : *EgammaCandidateCollection) {
 	reco::RecoEcalCandidateRef electronRef = getRef(EgammaCandidateCollection, index);
