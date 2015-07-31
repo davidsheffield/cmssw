@@ -202,6 +202,24 @@ void HLTScoutingElectronProducer::produce(edm::Event& iEvent, const edm::EventSe
 	    continue;
 	if (fabs(electron.eta()) > electronEtaCut)
 	    continue;
+	// Tight electron ID cut
+	if (fabs(electron.eta()) < 1.479) {
+	    if (fabs((*DetaMap)[electronRef]) > 0.006046
+		|| fabs((*DphiMap)[electronRef]) > 0.028092
+		|| (*SigmaIEtaIEtaMap)[electronRef] > 0.009947
+		|| (*HoverEMap)[electronRef] > 0.045772
+		|| (*OneOEMinusOneOPMap)[electronRef] > 0.020118
+		|| (*MissingHitsMap)[electronRef] > 1)
+		continue;
+	} else if (fabs(electron.eta()) < 2.5) {
+	    if (fabs((*DetaMap)[electronRef]) > 0.007057
+		|| fabs((*DphiMap)[electronRef]) > 0.030159
+		|| (*SigmaIEtaIEtaMap)[electronRef] > 0.028237
+		|| (*HoverEMap)[electronRef] > 0.067778
+		|| (*OneOEMinusOneOPMap)[electronRef] > 0.098919
+		|| (*MissingHitsMap)[electronRef] > 1)
+		continue;
+	}
 
 	outElectrons->emplace_back(electron.pt(), electron.eta(), electron.phi(), electron.mass(),
 				   0.0, // d0
