@@ -119,12 +119,21 @@ void HLTScoutingMuonProducer::produce(edm::Event& iEvent, const edm::EventSetup&
     for (auto &muon : *ChargedCandidateCollection) {
 	reco::RecoChargedCandidateRef muonRef = getRef(ChargedCandidateCollection, index);
 	++index;
-	if (muonRef.isNull() && !muonRef.isAvailable())
+	if (muonRef.isNull() || !muonRef.isAvailable())
+	    continue;
+
+	reco::TrackRef track = muon.track();
+	if (track.isNull() || !track.isAvailable())
 	    continue;
 
 	if (muon.pt() < muonPtCut)
 	    continue;
 	if (fabs(muon.eta()) > muonEtaCut)
+	    continue;
+	// Tight muon ID cut
+	if (track->normalizedChi2() >= 10
+	    || fabs(track->dxy()) > 0.2
+	    || fabs(track->dz()) > 0.5)
 	    continue;
 
 	outMuons->emplace_back(muon.pt(), // pt
@@ -134,11 +143,11 @@ void HLTScoutingMuonProducer::produce(edm::Event& iEvent, const edm::EventSetup&
 			       (*EcalPFClusterIsoMap)[muonRef], // ecalIso
 			       (*HcalPFClusterIsoMap)[muonRef], // hcalIso
 			       0.0, // trackIso
-			       0.0, // chi2
-			       0.0, // ndof
-			       0, // charge
-			       0.0, // dxy
-			       0.0, // dz
+			       track->chi2(), // chi2
+			       track->ndof(), // ndof
+			       track->charge(), // charge
+			       track->dxy(), // dxy
+			       track->dz(), // dz
 			       0, // nValidMuonHits
 			       0, // nValidPixelHits
 			       0, // nMatchedStations
