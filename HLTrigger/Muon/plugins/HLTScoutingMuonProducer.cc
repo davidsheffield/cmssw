@@ -24,14 +24,14 @@ Description: Producer for ScoutingElectron
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
-#include "DataFormats/Common/interface/getRef.h"
 #include "DataFormats/Common/interface/AssociationMap.h"
+#include "DataFormats/Common/interface/getRef.h"
+#include "DataFormats/Common/interface/ValueMap.h"
+#include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
+#include "DataFormats/RecoCandidate/interface/RecoChargedCandidateFwd.h"
+#include "DataFormats/TrackReco/interface/HitPattern.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
-#include "DataFormats/RecoCandidate/interface/RecoChargedCandidateFwd.h"
-#include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
-#include "DataFormats/TrackReco/interface/HitPattern.h"
-#include "DataFormats/Common/interface/ValueMap.h"
 
 #include "DataFormats/HLTReco/interface/HLTScoutingMuon.h"
 
@@ -143,33 +143,15 @@ void HLTScoutingMuonProducer::produce(edm::Event& iEvent, const edm::EventSetup&
 	    continue;
 	if (fabs(muon.eta()) > muonEtaCut)
 	    continue;
-	// Tight muon ID cut
-	/*if (track->normalizedChi2() >= 10
-	    || fabs(track->dxy()) > 0.2
-	    || fabs(track->dz()) > 0.5)
-	    continue;*/
 
-	outMuons->emplace_back(muon.pt(), // pt
-			       muon.eta(), // eta
-			       muon.phi(), // phi
-			       muon.mass(), // m
-			       (*EcalPFClusterIsoMap)[muonRef], // ecalIso
-			       (*HcalPFClusterIsoMap)[muonRef], // hcalIso
-			       (*TrackIsoMap)[muonRef], // trackIso
-			       track->chi2(), // chi2
-			       track->ndof(), // ndof
-			       track->charge(), // charge
-			       track->dxy(), // dxy
-			       track->dz(), // dz
-			       track->hitPattern().numberOfValidMuonHits(), // nValidMuonHits
-			       track->hitPattern().numberOfValidPixelHits(), // nValidPixelHits
+	outMuons->emplace_back(muon.pt(), muon.eta(), muon.phi(),  muon.mass(),
+			       (*EcalPFClusterIsoMap)[muonRef], (*HcalPFClusterIsoMap)[muonRef],
+			       (*TrackIsoMap)[muonRef], track->chi2(), track->ndof(),
+			       track->charge(), track->dxy(), track->dz(),
+			       track->hitPattern().numberOfValidMuonHits(),
+			       track->hitPattern().numberOfValidPixelHits(),
 			       0, // nMatchedStations
-			       track->hitPattern().trackerLayersWithMeasurement()); // nTrackerLayersWithMeasurement
-	// float pt, float eta, float phi, float m,
-	// float ecalIso, float hcalIso, float trackIso,
-	// float chi2, float ndof, int charge, float dxy, float dz,
-	// int nValidMuonHits, int nValidPixelHits,
-	// int nMatchedStations, int nTrackerLayersWithMeasurement
+			       track->hitPattern().trackerLayersWithMeasurement());
     }
 
     // Put output
