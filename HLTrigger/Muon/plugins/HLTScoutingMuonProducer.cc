@@ -30,6 +30,8 @@ Description: Producer for ScoutingElectron
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidateFwd.h"
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
+#include "DataFormats/TrackReco/interface/HitPattern.h"
+#include "DataFormats/Common/interface/ValueMap.h"
 
 #include "DataFormats/HLTReco/interface/HLTScoutingMuon.h"
 
@@ -49,6 +51,7 @@ class HLTScoutingMuonProducer : public edm::stream::EDProducer<> {
         edm::EDGetTokenT<reco::TrackCollection> TrackCollection_;
         edm::EDGetTokenT<RecoChargedCandMap> EcalPFClusterIsoMap_;
         edm::EDGetTokenT<RecoChargedCandMap> HcalPFClusterIsoMap_;
+        edm::EDGetTokenT<edm::ValueMap<double>> TrackIsoMap_;
 
         double muonPtCut;
         double muonEtaCut;
@@ -66,6 +69,8 @@ HLTScoutingMuonProducer::HLTScoutingMuonProducer(const edm::ParameterSet& iConfi
 							  "EcalPFClusterIsoMap"))),
     HcalPFClusterIsoMap_(consumes<RecoChargedCandMap>(iConfig.getParameter<edm::InputTag>(
 							  "HcalPFClusterIsoMap"))),
+    TrackIsoMap_(consumes<edm::ValueMap<double>>(iConfig.getParameter<edm::InputTag>(
+						     "TrackIsoMap"))),
     muonPtCut(iConfig.getParameter<double>("muonPtCut")),
     muonEtaCut(iConfig.getParameter<double>("muonEtaCut"))
 {
@@ -113,6 +118,14 @@ void HLTScoutingMuonProducer::produce(edm::Event& iEvent, const edm::EventSetup&
         return;
     }
 
+    // Get TrackIsoMap
+    Handle<ValueMap<double>> TrackIsoMap;
+    if(!iEvent.getByToken(TrackIsoMap_, TrackIsoMap)){
+        edm::LogError ("HLTScoutingMuonProducer")
+	    << "invalid collection: TrackIsoMap" << "\n";
+        return;
+    }
+
     // Produce muons
     std::auto_ptr<HLTScoutingMuonCollection> outMuons(new HLTScoutingMuonCollection());
     int index = 0;
@@ -131,10 +144,10 @@ void HLTScoutingMuonProducer::produce(edm::Event& iEvent, const edm::EventSetup&
 	if (fabs(muon.eta()) > muonEtaCut)
 	    continue;
 	// Tight muon ID cut
-	if (track->normalizedChi2() >= 10
+	/*if (track->normalizedChi2() >= 10
 	    || fabs(track->dxy()) > 0.2
 	    || fabs(track->dz()) > 0.5)
-	    continue;
+	    continue;*/
 
 	outMuons->emplace_back(muon.pt(), // pt
 			       muon.eta(), // eta
@@ -142,16 +155,16 @@ void HLTScoutingMuonProducer::produce(edm::Event& iEvent, const edm::EventSetup&
 			       muon.mass(), // m
 			       (*EcalPFClusterIsoMap)[muonRef], // ecalIso
 			       (*HcalPFClusterIsoMap)[muonRef], // hcalIso
-			       0.0, // trackIso
+			       (*TrackIsoMap)[muonRef], // trackIso
 			       track->chi2(), // chi2
 			       track->ndof(), // ndof
 			       track->charge(), // charge
 			       track->dxy(), // dxy
 			       track->dz(), // dz
-			       0, // nValidMuonHits
-			       0, // nValidPixelHits
+			       track->hitPattern().numberOfValidMuonHits(), // nValidMuonHits
+			       track->hitPattern().numberOfValidPixelHits(), // nValidPixelHits
 			       0, // nMatchedStations
-			       0); // nTrackerLayersWithMeasurement
+			       track->hitPattern().trackerLayersWithMeasurement()); // nTrackerLayersWithMeasurement
 	// float pt, float eta, float phi, float m,
 	// float ecalIso, float hcalIso, float trackIso,
 	// float chi2, float ndof, int charge, float dxy, float dz,
@@ -170,8 +183,10 @@ void HLTScoutingMuonProducer::fillDescriptions(edm::ConfigurationDescriptions& d
     desc.add<edm::InputTag>("Tracks", edm::InputTag("hltL3Muons"));
     desc.add<edm::InputTag>("EcalPFClusterIsoMap", edm::InputTag("hltMuonEcalPFClusterIsoForMuons"));
     desc.add<edm::InputTag>("HcalPFClusterIsoMap", edm::InputTag("hltMuonHcalPFClusterIsoForMuons"));
+    desc.add<edm::InputTag>("TrackIsoMap", edm::InputTag(
+				"hltMuonTkRelIsolationCut0p09Map:combinedRelativeIsoDeposits"));
     desc.add<double>("muonPtCut", 10.0);
-    desc.add<double>("muonEtaCut", 3.0);
+    desc.add<double>("muonEtaCut", 2.4);
     descriptions.add("scoutingMuonProducer", desc);
 }
 
