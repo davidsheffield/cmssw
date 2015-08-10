@@ -16,6 +16,7 @@ Description: Producer for ScoutingElectron
 
 // system include files
 #include <memory>
+#include <iostream>
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -26,10 +27,14 @@ Description: Producer for ScoutingElectron
 
 #include "DataFormats/Common/interface/getRef.h"
 #include "DataFormats/Common/interface/AssociationMap.h"
+#include "DataFormats/EgammaReco/interface/SuperCluster.h"
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 #include "DataFormats/GsfTrackReco/interface/GsfTrackFwd.h"
 #include "DataFormats/RecoCandidate/interface/RecoEcalCandidateFwd.h"
 #include "DataFormats/RecoCandidate/interface/RecoEcalCandidate.h"
+#include "DataFormats/EgammaReco/interface/ElectronSeed.h"
+#include "DataFormats/EgammaReco/interface/ElectronSeedFwd.h"
+#include "DataFormats/TrajectorySeed/interface/TrajectorySeedCollection.h"
 
 #include "DataFormats/HLTReco/interface/HLTScoutingElectron.h"
 
@@ -56,6 +61,7 @@ class HLTScoutingElectronProducer : public edm::stream::EDProducer<> {
         edm::EDGetTokenT<RecoEcalCandMap> EcalPFClusterIsoMap_;
         edm::EDGetTokenT<RecoEcalCandMap> EleGsfTrackIsoMap_;
         edm::EDGetTokenT<RecoEcalCandMap> HcalPFClusterIsoMap_;
+    //edm::EDGetTokenT<reco::ElectronCollection> ElectronCollection_;
 
         double electronPtCut;
         double electronEtaCut;
@@ -84,6 +90,8 @@ HLTScoutingElectronProducer::HLTScoutingElectronProducer(const edm::ParameterSet
 						     "EleGsfTrackIsoMap"))),
     HcalPFClusterIsoMap_(consumes<RecoEcalCandMap>(iConfig.getParameter<edm::InputTag>(
 						       "HcalPFClusterIsoMap"))),
+    //ElectronCollection_(consumes<reco::ElectronCollection>(iConfig.getParameter<edm::InputTag>(
+//							       "ElectronCollection"))),
     electronPtCut(iConfig.getParameter<double>("electronPtCut")),
     electronEtaCut(iConfig.getParameter<double>("electronEtaCut"))
 {
@@ -107,6 +115,15 @@ void HLTScoutingElectronProducer::produce(edm::Event& iEvent, const edm::EventSe
 	    << "invalid collection: EgammaCandidateCollection" << "\n";
         return;
     }
+
+    // Get GsfElectron
+    /*Handle<reco::ElectronCollection> ElectronCollection;
+    if(!iEvent.getByToken(ElectronCollection_,
+			  ElectronCollection)){
+        edm::LogError ("HLTScoutingElectronProducer")
+	    << "invalid collection: ElectronCollection" << "\n";
+        return;
+	}*/
 
     // Get GsfTrack
     Handle<reco::GsfTrackCollection> EgammaGsfTrackCollection;
@@ -203,7 +220,7 @@ void HLTScoutingElectronProducer::produce(edm::Event& iEvent, const edm::EventSe
 	if (fabs(electron.eta()) > electronEtaCut)
 	    continue;
 	// Tight electron ID cut
-	if (fabs(electron.eta()) < 1.479) {
+	/*if (fabs(electron.eta()) < 1.479) {
 	    if (fabs((*DetaMap)[electronRef]) > 0.006046
 		|| fabs((*DphiMap)[electronRef]) > 0.028092
 		|| (*SigmaIEtaIEtaMap)[electronRef] > 0.009947
@@ -219,16 +236,72 @@ void HLTScoutingElectronProducer::produce(edm::Event& iEvent, const edm::EventSe
 		|| (*OneOEMinusOneOPMap)[electronRef] > 0.098919
 		|| (*MissingHitsMap)[electronRef] > 1)
 		continue;
+		}*/
+
+	/*reco::GsfTrackRef track = electron.gsfTrack();
+	if (track.isNonnull()) {
+	    if (track.isAvailable())
+		std::cout << "NONNULL, AVAILABLE" << std::endl;
+	    else
+		std::cout << "not available, nonnull" << std::endl;
+	} else {
+	    std::cout << "null" << std::endl;
+	}*/
+	/*reco::TrackBaseRef track = electron.bestTrackRef();
+	if (track.isNonnull()) {
+	    if (track.isAvailable())
+		std::cout << "NONNULL, AVAILABLE" << std::endl;
+	    else
+		std::cout << "not available, nonnull" << std::endl;
+	} else {
+	    std::cout << "null" << std::endl;
+	    }*/
+	reco::SuperClusterRef scRef = electron.superCluster();
+	if (scRef.isNonnull()) {
+	    if (scRef.isAvailable())
+		std::cout << "NONNULL, AVAILABLE" << std::endl;
+	    else
+		std::cout << "not available, nonnull" << std::endl;
+
+	    /*reco::GsfTrackRef track = scRef->gsfTrack();
+	    if (track.isNonnull())
+		std::cout << "TRACK NONNULL" << std::endl;
+	    else
+	    std::cout << "track null" << std::endl;*/
+	} else {
+	    std::cout << "null" << std::endl;
+	}
+	/*for (auto &ele: *ElectronCollection) {
+	    std::cout << "   " << ele.superCluster()->rawEnergy() << " " << scRef->rawEnergy() << std::endl;
+	    if (ele.superCluster() == scRef)
+		std::cout << "MATCHES" << std::endl;
+		}*/
+	double d0 = 0.0;
+	double dz = 0.0;
+	int charge = 0;
+	for (auto &track: *EgammaGsfTrackCollection) {
+	    RefToBase<TrajectorySeed> seed = track.extra()->seedRef();
+	    reco::ElectronSeedRef elseed = seed.castTo<reco::ElectronSeedRef>();
+	    RefToBase<reco::CaloCluster> caloCluster = elseed->caloCluster();
+	    reco::SuperClusterRef scRefFromTrk = caloCluster.castTo<reco::SuperClusterRef>() ;
+	    //std::cout << "   " << scRefFromTrk->rawEnergy() << " " << scRef->rawEnergy() << std::endl;
+	    if (scRefFromTrk == scRef) {
+	     	std::cout << "MATCHES " << track.charge() << std::endl;
+		d0 = track.d0();
+		dz = track.dz();
+		charge = track.charge();
+	    }
 	}
 
+
 	outElectrons->emplace_back(electron.pt(), electron.eta(), electron.phi(), electron.mass(),
-				   0.0, // d0
-				   0.0, // dZ
+				   d0, // d0
+				   dz, // dZ
 				   (*DetaMap)[electronRef], (*DphiMap)[electronRef],
 				   (*SigmaIEtaIEtaMap)[electronRef], (*HoverEMap)[electronRef],
 				   (*OneOEMinusOneOPMap)[electronRef],
 				   (*MissingHitsMap)[electronRef],
-				   0, // charge
+				   charge, // charge
 				   (*EcalPFClusterIsoMap)[electronRef],
 				   (*HcalPFClusterIsoMap)[electronRef],
 				   (*EleGsfTrackIsoMap)[electronRef]);
@@ -259,8 +332,9 @@ void HLTScoutingElectronProducer::fillDescriptions(edm::ConfigurationDescription
     desc.add<edm::InputTag>("EcalPFClusterIsoMap", edm::InputTag("hltEgammaEcalPFClusterIso"));
     desc.add<edm::InputTag>("EleGsfTrackIsoMap", edm::InputTag("hltEgammaEleGsfTrackIso"));
     desc.add<edm::InputTag>("HcalPFClusterIsoMap", edm::InputTag("hltEgammaHcalPFClusterIso"));
+    //desc.add<edm::InputTag>("ElectronCollection", edm::InputTag("hltEgammaGsfElectrons"));
     desc.add<double>("electronPtCut", 10.0);
-    desc.add<double>("electronEtaCut", 3.0);
+    desc.add<double>("electronEtaCut", 2.5);
     descriptions.add("scoutingElectronProducer", desc);
 }
 
