@@ -2,6 +2,7 @@
 #include "DataFormats/Scouting/interface/ScoutingPFJet.h"
 #include "DataFormats/Scouting/interface/ScoutingParticle.h"
 #include "DataFormats/Scouting/interface/ScoutingVertex.h"
+#include "DataFormats/Scouting/interface/ScoutingElectron.h"
 #include "DataFormats/Common/interface/Wrapper.h"
 #include "DataFormats/Common/interface/Ref.h"
 
@@ -12,5 +13,6 @@ namespace DataFormats_Scouting {
     edm::Wrapper<ScoutingParticleCollection> sc2;
     edm::Wrapper<ScoutingPFJetCollection> sc3;
     edm::Wrapper<ScoutingVertexCollection> sc4;
+    edm::Wrapper<ScoutingElectronCollection> sc5;
   };
 }
