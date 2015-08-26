@@ -25,22 +25,22 @@ class ScoutingMuon
 		nValidPixelHits_(0), nMatchedStations_(0), nTrackerLayersWithMeasurement_(0) {}
 
         //accessor functions
-        float pt() { return pt_; }
-        float eta() { return eta_; }
-        float phi() { return phi_; }
-        float m() { return m_; }
-        float ecalIso() { return ecalIso_; }
-        float hcalIso() { return hcalIso_; }
-        float trackIso() { return trackIso_; }
-        float chi2() { return chi2_; }
-        float ndof() { return ndof_; }
-        int charge() { return charge_; }
-        float dxy() { return dxy_; }
-        float dz() { return dz_; }
-        int nValidMuonHits() { return nValidMuonHits_; }
-        int nValidPixelHits() { return nValidPixelHits_; }
-        int nMatchedStations() { return nMatchedStations_; }
-        int nTrackerLayersWithMeasurement() { return nTrackerLayersWithMeasurement_; }
+        float pt() const { return pt_; }
+        float eta() const { return eta_; }
+        float phi() const { return phi_; }
+        float m() const { return m_; }
+        float ecalIso() const { return ecalIso_; }
+        float hcalIso() const { return hcalIso_; }
+        float trackIso() const { return trackIso_; }
+        float chi2() const { return chi2_; }
+        float ndof() const { return ndof_; }
+        int charge() const { return charge_; }
+        float dxy() const { return dxy_; }
+        float dz() const { return dz_; }
+        int nValidMuonHits() const { return nValidMuonHits_; }
+        int nValidPixelHits() const { return nValidPixelHits_; }
+        int nMatchedStations() const { return nMatchedStations_; }
+        int nTrackerLayersWithMeasurement() const { return nTrackerLayersWithMeasurement_; }
 
     private:
         float pt_;

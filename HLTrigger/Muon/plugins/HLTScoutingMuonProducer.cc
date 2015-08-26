@@ -76,7 +76,7 @@ HLTScoutingMuonProducer::HLTScoutingMuonProducer(const edm::ParameterSet& iConfi
     muonEtaCut(iConfig.getParameter<double>("muonEtaCut"))
 {
     //register products
-    produces<ScoutingMuonCollection>("scoutingMuons");
+    produces<ScoutingMuonCollection>();
 }
 
 HLTScoutingMuonProducer::~HLTScoutingMuonProducer()
@@ -157,7 +157,7 @@ void HLTScoutingMuonProducer::produce(edm::StreamID sid, edm::Event & iEvent,
     }
 
     // Put output
-    iEvent.put(outMuons, "scoutingMuons");
+    iEvent.put(outMuons);
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------

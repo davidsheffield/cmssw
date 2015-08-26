@@ -93,7 +93,7 @@ HLTScoutingElectronProducer::HLTScoutingElectronProducer(const edm::ParameterSet
     electronEtaCut(iConfig.getParameter<double>("electronEtaCut"))
 {
     //register products
-    produces<ScoutingElectronCollection>("scoutingElectrons");
+    produces<ScoutingElectronCollection>();
 }
 
 HLTScoutingElectronProducer::~HLTScoutingElectronProducer()
@@ -241,7 +241,7 @@ void HLTScoutingElectronProducer::produce(edm::StreamID sid, edm::Event & iEvent
     }
 
     // Put output
-    iEvent.put(outElectrons, "scoutingElectrons");
+    iEvent.put(outElectrons);
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------

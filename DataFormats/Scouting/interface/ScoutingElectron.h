@@ -22,22 +22,22 @@ class ScoutingElectron
 	    hcalIso_(0), trackIso_(0) {}
 
         //accessor functions
-        float pt() { return pt_; }
-        float eta() { return eta_; }
-        float phi() { return phi_; }
-        float m() { return m_; }
-        float d0() { return d0_; }
-        float dZ() { return dZ_; }
-        float dEtaIn() { return dEtaIn_; }
-        float dPhiIn() { return dPhiIn_; }
-        float sigmaIetaIeta() { return sigmaIetaIeta_; }
-        float hOverE() { return hOverE_; }
-        float ooEMOop() { return ooEMOop_; }
-        int missingHits() { return missingHits_; }
-        int charge() { return charge_; }
-        float ecalIso() { return ecalIso_; }
-        float hcalIso() { return hcalIso_; }
-        float trackIso() { return trackIso_; }
+        float pt() const { return pt_; }
+        float eta() const { return eta_; }
+        float phi() const { return phi_; }
+        float m() const { return m_; }
+        float d0() const { return d0_; }
+        float dZ() const { return dZ_; }
+        float dEtaIn() const { return dEtaIn_; }
+        float dPhiIn() const { return dPhiIn_; }
+        float sigmaIetaIeta() const { return sigmaIetaIeta_; }
+        float hOverE() const { return hOverE_; }
+        float ooEMOop() const { return ooEMOop_; }
+        int missingHits() const { return missingHits_; }
+        int charge() const { return charge_; }
+        float ecalIso() const { return ecalIso_; }
+        float hcalIso() const { return hcalIso_; }
+        float trackIso() const { return trackIso_; }
 
     private:
         float pt_;
