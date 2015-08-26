@@ -19,7 +19,7 @@ Description: Producer for ScoutingElectron
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/stream/EDProducer.h"
+#include "FWCore/Framework/interface/global/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -35,7 +35,7 @@ Description: Producer for ScoutingElectron
 
 #include "DataFormats/Scouting/interface/ScoutingMuon.h"
 
-class HLTScoutingMuonProducer : public edm::stream::EDProducer<> {
+class HLTScoutingMuonProducer : public edm::global::EDProducer<> {
     typedef edm::AssociationMap<edm::OneToValue<std::vector<reco::RecoChargedCandidate>, float,
 						unsigned int> > RecoChargedCandMap;
     public:
@@ -45,16 +45,17 @@ class HLTScoutingMuonProducer : public edm::stream::EDProducer<> {
         static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
     private:
-        virtual void produce(edm::Event&, const edm::EventSetup&) override;
+        virtual void produce(edm::StreamID sid, edm::Event & iEvent, edm::EventSetup const & setup)
+	    const override final;
 
-        edm::EDGetTokenT<reco::RecoChargedCandidateCollection> ChargedCandidateCollection_;
-        edm::EDGetTokenT<reco::TrackCollection> TrackCollection_;
-        edm::EDGetTokenT<RecoChargedCandMap> EcalPFClusterIsoMap_;
-        edm::EDGetTokenT<RecoChargedCandMap> HcalPFClusterIsoMap_;
-        edm::EDGetTokenT<edm::ValueMap<double>> TrackIsoMap_;
+        const edm::EDGetTokenT<reco::RecoChargedCandidateCollection> ChargedCandidateCollection_;
+        const edm::EDGetTokenT<reco::TrackCollection> TrackCollection_;
+        const edm::EDGetTokenT<RecoChargedCandMap> EcalPFClusterIsoMap_;
+        const edm::EDGetTokenT<RecoChargedCandMap> HcalPFClusterIsoMap_;
+        const edm::EDGetTokenT<edm::ValueMap<double>> TrackIsoMap_;
 
-        double muonPtCut;
-        double muonEtaCut;
+        const double muonPtCut;
+        const double muonEtaCut;
 };
 
 //
@@ -82,7 +83,8 @@ HLTScoutingMuonProducer::~HLTScoutingMuonProducer()
 { }
 
 // ------------ method called to produce the data  ------------
-void HLTScoutingMuonProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
+void HLTScoutingMuonProducer::produce(edm::StreamID sid, edm::Event & iEvent,
+				      edm::EventSetup const & setup) const
 {
     using namespace edm;
 
