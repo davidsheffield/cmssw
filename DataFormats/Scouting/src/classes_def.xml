@@ -18,7 +18,7 @@
       <version ClassVersion="2" checksum="697825753"/>
   </class>
   <class name="ScoutingPhoton" ClassVersion="2">
-      <version ClassVersion="2" checksum="2766810784"/>
+      <version ClassVersion="2" checksum="1710857481"/>
   </class>
   <class name="std::vector<ScoutingCaloJet>"/>
   <class name="std::vector<ScoutingPFJet>"/>

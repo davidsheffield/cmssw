@@ -1,11 +1,11 @@
 // -*- C++ -*-
 //
 // Package:    HLTrigger/Egamma
-// Class:      HLTScoutingElectronProducer
+// Class:      HLTScoutingEgammaProducer
 //
-/**\class HLTScoutingElectronProducer HLTScoutingElectronProducer.cc HLTrigger/Egamma/plugin/HLTScoutingElectronProducer.cc
+/**\class HLTScoutingEgammaProducer HLTScoutingEgammaProducer.cc HLTrigger/Egamma/plugin/HLTScoutingEgammaProducer.cc
 
-Description: Producer for ScoutingElectron
+Description: Producer for ScoutingElectron and ScoutingPhoton
 
 */
 //
@@ -36,19 +36,20 @@ Description: Producer for ScoutingElectron
 #include "DataFormats/TrajectorySeed/interface/TrajectorySeedCollection.h"
 
 #include "DataFormats/Scouting/interface/ScoutingElectron.h"
+#include "DataFormats/Scouting/interface/ScoutingPhoton.h"
 
-class HLTScoutingElectronProducer : public edm::global::EDProducer<> {
+class HLTScoutingEgammaProducer : public edm::global::EDProducer<> {
     typedef edm::AssociationMap<edm::OneToValue<std::vector<reco::RecoEcalCandidate>, float,
 						unsigned int> > RecoEcalCandMap;
     public:
-        explicit HLTScoutingElectronProducer(const edm::ParameterSet&);
-        ~HLTScoutingElectronProducer();
+        explicit HLTScoutingEgammaProducer(const edm::ParameterSet&);
+        ~HLTScoutingEgammaProducer();
 
         static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
     private:
-        virtual void produce(edm::StreamID sid, edm::Event & iEvent, edm::EventSetup const & setup) const override final;
-    //virtual void produce(edm::StreamID sid, edm::Event&, const edm::EventSetup&) override;
+        virtual void produce(edm::StreamID sid, edm::Event & iEvent, edm::EventSetup const & setup)
+	    const override final;
 
         const edm::EDGetTokenT<reco::RecoEcalCandidateCollection> EgammaCandidateCollection_;
         const edm::EDGetTokenT<reco::GsfTrackCollection> EgammaGsfTrackCollection_;
@@ -64,12 +65,14 @@ class HLTScoutingElectronProducer : public edm::global::EDProducer<> {
 
         const double electronPtCut;
         const double electronEtaCut;
+        const double photonPtCut;
+        const double photonEtaCut;
 };
 
 //
 // constructors and destructor
 //
-HLTScoutingElectronProducer::HLTScoutingElectronProducer(const edm::ParameterSet& iConfig):
+HLTScoutingEgammaProducer::HLTScoutingEgammaProducer(const edm::ParameterSet& iConfig):
     EgammaCandidateCollection_(consumes<reco::RecoEcalCandidateCollection>
 			       (iConfig.getParameter<edm::InputTag>("EgammaCandidates"))),
     EgammaGsfTrackCollection_(consumes<reco::GsfTrackCollection>
@@ -90,18 +93,21 @@ HLTScoutingElectronProducer::HLTScoutingElectronProducer(const edm::ParameterSet
     HcalPFClusterIsoMap_(consumes<RecoEcalCandMap>(iConfig.getParameter<edm::InputTag>(
 						       "HcalPFClusterIsoMap"))),
     electronPtCut(iConfig.getParameter<double>("electronPtCut")),
-    electronEtaCut(iConfig.getParameter<double>("electronEtaCut"))
+    electronEtaCut(iConfig.getParameter<double>("electronEtaCut")),
+    photonPtCut(iConfig.getParameter<double>("photonPtCut")),
+    photonEtaCut(iConfig.getParameter<double>("photonEtaCut"))
 {
     //register products
     produces<ScoutingElectronCollection>();
+    produces<ScoutingPhotonCollection>();
 }
 
-HLTScoutingElectronProducer::~HLTScoutingElectronProducer()
+HLTScoutingEgammaProducer::~HLTScoutingEgammaProducer()
 { }
 
 // ------------ method called to produce the data  ------------
-void HLTScoutingElectronProducer::produce(edm::StreamID sid, edm::Event & iEvent, edm::EventSetup const & setup) const
-//void HLTScoutingElectronProducer::produce(edm::StreamID sid, edm::Event& iEvent, const edm::EventSetup& iSetup) const
+void HLTScoutingEgammaProducer::produce(edm::StreamID sid, edm::Event & iEvent, edm::EventSetup const & setup) const
+//void HLTScoutingEgammaProducer::produce(edm::StreamID sid, edm::Event& iEvent, const edm::EventSetup& iSetup) const
 {
     using namespace edm;
 
@@ -109,7 +115,7 @@ void HLTScoutingElectronProducer::produce(edm::StreamID sid, edm::Event & iEvent
     Handle<reco::RecoEcalCandidateCollection> EgammaCandidateCollection;
     if(!iEvent.getByToken(EgammaCandidateCollection_,
 			  EgammaCandidateCollection)){
-        edm::LogError ("HLTScoutingElectronProducer")
+        edm::LogError ("HLTScoutingEgammaProducer")
 	    << "invalid collection: EgammaCandidateCollection" << "\n";
         return;
     }
@@ -118,7 +124,7 @@ void HLTScoutingElectronProducer::produce(edm::StreamID sid, edm::Event & iEvent
     Handle<reco::GsfTrackCollection> EgammaGsfTrackCollection;
     if(!iEvent.getByToken(EgammaGsfTrackCollection_,
 			  EgammaGsfTrackCollection)){
-        edm::LogError ("HLTScoutingElectronProducer")
+        edm::LogError ("HLTScoutingEgammaProducer")
 	    << "invalid collection: EgammaGsfTrackCollection" << "\n";
         return;
     }
@@ -126,7 +132,7 @@ void HLTScoutingElectronProducer::produce(edm::StreamID sid, edm::Event & iEvent
     // Get SigmaIEtaIEtaMap
     Handle<RecoEcalCandMap> SigmaIEtaIEtaMap;
     if(!iEvent.getByToken(SigmaIEtaIEtaMap_, SigmaIEtaIEtaMap)){
-        edm::LogError ("HLTScoutingElectronProducer")
+        edm::LogError ("HLTScoutingEgammaProducer")
 	    << "invalid collection: hltEgammaClusterShape:sigmaIEtaIEta5x5" << "\n";
         return;
     }
@@ -134,7 +140,7 @@ void HLTScoutingElectronProducer::produce(edm::StreamID sid, edm::Event & iEvent
     // Get HoverEMap
     Handle<RecoEcalCandMap> HoverEMap;
     if(!iEvent.getByToken(HoverEMap_, HoverEMap)){
-        edm::LogError ("HLTScoutingElectronProducer")
+        edm::LogError ("HLTScoutingEgammaProducer")
 	    << "invalid collection: hltEgammaHoverE" << "\n";
         return;
     }
@@ -142,7 +148,7 @@ void HLTScoutingElectronProducer::produce(edm::StreamID sid, edm::Event & iEvent
     // Get DetaMap
     Handle<RecoEcalCandMap> DetaMap;
     if(!iEvent.getByToken(DetaMap_, DetaMap)){
-        edm::LogError ("HLTScoutingElectronProducer")
+        edm::LogError ("HLTScoutingEgammaProducer")
 	    << "invalid collection: hltEgammaGsfTrackVars:Deta" << "\n";
         return;
     }
@@ -150,7 +156,7 @@ void HLTScoutingElectronProducer::produce(edm::StreamID sid, edm::Event & iEvent
     // Get Map
     Handle<RecoEcalCandMap> DphiMap;
     if(!iEvent.getByToken(DphiMap_, DphiMap)){
-        edm::LogError ("HLTScoutingElectronProducer")
+        edm::LogError ("HLTScoutingEgammaProducer")
 	    << "invalid collection: hltEgammaGsfTrackVars:Dphi" << "\n";
         return;
     }
@@ -158,7 +164,7 @@ void HLTScoutingElectronProducer::produce(edm::StreamID sid, edm::Event & iEvent
     // Get MissingHitsMap
     Handle<RecoEcalCandMap> MissingHitsMap;
     if(!iEvent.getByToken(MissingHitsMap_, MissingHitsMap)){
-        edm::LogError ("HLTScoutingElectronProducer")
+        edm::LogError ("HLTScoutingEgammaProducer")
 	    << "invalid collection: hltEgammaGsfTrackVars:MissingHits" << "\n";
         return;
     }
@@ -166,7 +172,7 @@ void HLTScoutingElectronProducer::produce(edm::StreamID sid, edm::Event & iEvent
     // Get 1/E - 1/p Map
     Handle<RecoEcalCandMap> OneOEMinusOneOPMap;
     if(!iEvent.getByToken(OneOEMinusOneOPMap_, OneOEMinusOneOPMap)){
-        edm::LogError ("HLTScoutingElectronProducer")
+        edm::LogError ("HLTScoutingEgammaProducer")
 	    << "invalid collection: hltEgammaGsfTrackVars:OneOESuperMinusOneOP" << "\n";
         return;
     }
@@ -174,7 +180,7 @@ void HLTScoutingElectronProducer::produce(edm::StreamID sid, edm::Event & iEvent
     // Get EcalPFClusterIsoMap
     Handle<RecoEcalCandMap> EcalPFClusterIsoMap;
     if(!iEvent.getByToken(EcalPFClusterIsoMap_, EcalPFClusterIsoMap)){
-        edm::LogError ("HLTScoutingElectronProducer")
+        edm::LogError ("HLTScoutingEgammaProducer")
 	    << "invalid collection: hltEgammaEcalPFClusterIso" << "\n";
         return;
     }
@@ -182,7 +188,7 @@ void HLTScoutingElectronProducer::produce(edm::StreamID sid, edm::Event & iEvent
     // Get EleGsfTrackIsoMap
     Handle<RecoEcalCandMap> EleGsfTrackIsoMap;
     if(!iEvent.getByToken(EleGsfTrackIsoMap_, EleGsfTrackIsoMap)){
-        edm::LogError ("HLTScoutingElectronProducer")
+        edm::LogError ("HLTScoutingEgammaProducer")
 	    << "invalid collection: hltEgammaEleGsfTrackIso" << "\n";
         return;
     }
@@ -190,26 +196,27 @@ void HLTScoutingElectronProducer::produce(edm::StreamID sid, edm::Event & iEvent
     // Get HcalPFClusterIsoMap
     Handle<RecoEcalCandMap> HcalPFClusterIsoMap;
     if(!iEvent.getByToken(HcalPFClusterIsoMap_, HcalPFClusterIsoMap)){
-        edm::LogError ("HLTScoutingElectronProducer")
+        edm::LogError ("HLTScoutingEgammaProducer")
 	    << "invalid collection: HcalPFClusterIso" << "\n";
         return;
     }
 
-    // Produce electrons
+    // Produce electrons and photons
     std::auto_ptr<ScoutingElectronCollection> outElectrons(new ScoutingElectronCollection());
+    std::auto_ptr<ScoutingPhotonCollection> outPhotons(new ScoutingPhotonCollection());
     int index = 0;
-    for (auto &electron : *EgammaCandidateCollection) {
-	reco::RecoEcalCandidateRef electronRef = getRef(EgammaCandidateCollection, index);
+    for (auto &candidate : *EgammaCandidateCollection) {
+	reco::RecoEcalCandidateRef candidateRef = getRef(EgammaCandidateCollection, index);
 	++index;
-	if (electronRef.isNull() && !electronRef.isAvailable())
+	if (candidateRef.isNull() && !candidateRef.isAvailable())
 	    continue;
 
-	if (electron.pt() < electronPtCut)
+	if (candidate.pt() < electronPtCut)
 	    continue;
-	if (fabs(electron.eta()) > electronEtaCut)
+	if (fabs(candidate.eta()) > electronEtaCut)
 	    continue;
 
-	reco::SuperClusterRef scRef = electron.superCluster();
+	reco::SuperClusterRef scRef = candidate.superCluster();
 	if (scRef.isNull() && !scRef.isAvailable())
 	    continue;
 	float d0 = 0.0;
@@ -226,26 +233,38 @@ void HLTScoutingElectronProducer::produce(edm::StreamID sid, edm::Event & iEvent
 		charge = track.charge();
 	    }
 	}
-	if (charge == -999)
-	    continue;
-
-
-	outElectrons->emplace_back(electron.pt(), electron.eta(), electron.phi(), electron.mass(),
-				   d0, dz, (*DetaMap)[electronRef], (*DphiMap)[electronRef],
-				   (*SigmaIEtaIEtaMap)[electronRef], (*HoverEMap)[electronRef],
-				   (*OneOEMinusOneOPMap)[electronRef],
-				   (*MissingHitsMap)[electronRef],
-				   charge, (*EcalPFClusterIsoMap)[electronRef],
-				   (*HcalPFClusterIsoMap)[electronRef],
-				   (*EleGsfTrackIsoMap)[electronRef]);
+	if (charge == -999) {
+	    outPhotons->emplace_back(candidate.pt(), candidate.eta(), candidate.phi(),
+				     candidate.mass(),
+				     0, //(*DetaMap)[candidateRef],
+				     0, //(*DphiMap)[candidateRef],
+				     (*SigmaIEtaIEtaMap)[candidateRef],
+				     (*HoverEMap)[candidateRef],
+				     0, //(*OneOEMinusOneOPMap)[candidateRef],
+				     0, //(*MissingHitsMap)[candidateRef],
+				     0, //charge,
+				     (*EcalPFClusterIsoMap)[candidateRef],
+				     (*HcalPFClusterIsoMap)[candidateRef]);
+	} else {
+	    outElectrons->emplace_back(candidate.pt(), candidate.eta(), candidate.phi(),
+				       candidate.mass(), d0, dz, (*DetaMap)[candidateRef],
+				       (*DphiMap)[candidateRef], (*SigmaIEtaIEtaMap)[candidateRef],
+				       (*HoverEMap)[candidateRef],
+				       (*OneOEMinusOneOPMap)[candidateRef],
+				       (*MissingHitsMap)[candidateRef], charge,
+				       (*EcalPFClusterIsoMap)[candidateRef],
+				       (*HcalPFClusterIsoMap)[candidateRef],
+				       (*EleGsfTrackIsoMap)[candidateRef]);
+	}
     }
 
     // Put output
     iEvent.put(outElectrons);
+    iEvent.put(outPhotons);
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
-void HLTScoutingElectronProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void HLTScoutingEgammaProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     edm::ParameterSetDescription desc;
     desc.add<edm::InputTag>("EgammaCandidates", edm::InputTag("hltEgammaCandidates"));
     desc.add<edm::InputTag>("EgammaGsfTracks", edm::InputTag("hltEgammaGsfTracks"));
@@ -262,8 +281,10 @@ void HLTScoutingElectronProducer::fillDescriptions(edm::ConfigurationDescription
     desc.add<edm::InputTag>("HcalPFClusterIsoMap", edm::InputTag("hltEgammaHcalPFClusterIso"));
     desc.add<double>("electronPtCut", 10.0);
     desc.add<double>("electronEtaCut", 2.5);
-    descriptions.add("scoutingElectronProducer", desc);
+    desc.add<double>("photonPtCut", 10.0);
+    desc.add<double>("photonEtaCut", 2.5);
+    descriptions.add("hltScoutingEgammaProducer", desc);
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(HLTScoutingElectronProducer);
+DEFINE_FWK_MODULE(HLTScoutingEgammaProducer);
