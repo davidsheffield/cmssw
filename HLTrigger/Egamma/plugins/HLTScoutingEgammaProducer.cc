@@ -63,10 +63,8 @@ class HLTScoutingEgammaProducer : public edm::global::EDProducer<> {
         const edm::EDGetTokenT<RecoEcalCandMap> EleGsfTrackIsoMap_;
         const edm::EDGetTokenT<RecoEcalCandMap> HcalPFClusterIsoMap_;
 
-        const double electronPtCut;
-        const double electronEtaCut;
-        const double photonPtCut;
-        const double photonEtaCut;
+        const double egammaPtCut;
+        const double egammaEtaCut;
 };
 
 //
@@ -92,10 +90,8 @@ HLTScoutingEgammaProducer::HLTScoutingEgammaProducer(const edm::ParameterSet& iC
 						     "EleGsfTrackIsoMap"))),
     HcalPFClusterIsoMap_(consumes<RecoEcalCandMap>(iConfig.getParameter<edm::InputTag>(
 						       "HcalPFClusterIsoMap"))),
-    electronPtCut(iConfig.getParameter<double>("electronPtCut")),
-    electronEtaCut(iConfig.getParameter<double>("electronEtaCut")),
-    photonPtCut(iConfig.getParameter<double>("photonPtCut")),
-    photonEtaCut(iConfig.getParameter<double>("photonEtaCut"))
+    egammaPtCut(iConfig.getParameter<double>("egammaPtCut")),
+    egammaEtaCut(iConfig.getParameter<double>("egammaEtaCut")),
 {
     //register products
     produces<ScoutingElectronCollection>();
@@ -107,7 +103,6 @@ HLTScoutingEgammaProducer::~HLTScoutingEgammaProducer()
 
 // ------------ method called to produce the data  ------------
 void HLTScoutingEgammaProducer::produce(edm::StreamID sid, edm::Event & iEvent, edm::EventSetup const & setup) const
-//void HLTScoutingEgammaProducer::produce(edm::StreamID sid, edm::Event& iEvent, const edm::EventSetup& iSetup) const
 {
     using namespace edm;
 
@@ -233,19 +228,18 @@ void HLTScoutingEgammaProducer::produce(edm::StreamID sid, edm::Event & iEvent, 
 		charge = track.charge();
 	    }
 	}
-	if (charge == -999) {
+	if (charge == -999 // No associated track
+	    || (*MissingHitsMap)[candidateRef] > 0) { // Candidate is a scouting photon
 	    outPhotons->emplace_back(candidate.pt(), candidate.eta(), candidate.phi(),
-				     candidate.mass(),
-				     0, //(*DetaMap)[candidateRef],
-				     0, //(*DphiMap)[candidateRef],
-				     (*SigmaIEtaIEtaMap)[candidateRef],
+				     candidate.mass(), d0, dz, (*DetaMap)[candidateRef],
+				     (*DphiMap)[candidateRef], (*SigmaIEtaIEtaMap)[candidateRef],
 				     (*HoverEMap)[candidateRef],
-				     0, //(*OneOEMinusOneOPMap)[candidateRef],
-				     0, //(*MissingHitsMap)[candidateRef],
-				     0, //charge,
+				     (*OneOEMinusOneOPMap)[candidateRef],
+				     (*MissingHitsMap)[candidateRef], 0, // Charge = 0
 				     (*EcalPFClusterIsoMap)[candidateRef],
-				     (*HcalPFClusterIsoMap)[candidateRef]);
-	} else {
+				     (*HcalPFClusterIsoMap)[candidateRef],
+				     (*EleGsfTrackIsoMap)[candidateRef]);
+	} else { // Candidate is a scouting electron
 	    outElectrons->emplace_back(candidate.pt(), candidate.eta(), candidate.phi(),
 				       candidate.mass(), d0, dz, (*DetaMap)[candidateRef],
 				       (*DphiMap)[candidateRef], (*SigmaIEtaIEtaMap)[candidateRef],
@@ -279,10 +273,8 @@ void HLTScoutingEgammaProducer::fillDescriptions(edm::ConfigurationDescriptions&
     desc.add<edm::InputTag>("EcalPFClusterIsoMap", edm::InputTag("hltEgammaEcalPFClusterIso"));
     desc.add<edm::InputTag>("EleGsfTrackIsoMap", edm::InputTag("hltEgammaEleGsfTrackIso"));
     desc.add<edm::InputTag>("HcalPFClusterIsoMap", edm::InputTag("hltEgammaHcalPFClusterIso"));
-    desc.add<double>("electronPtCut", 10.0);
-    desc.add<double>("electronEtaCut", 2.5);
-    desc.add<double>("photonPtCut", 10.0);
-    desc.add<double>("photonEtaCut", 2.5);
+    desc.add<double>("egammaPtCut", 10.0);
+    desc.add<double>("egammaEtaCut", 2.5);
     descriptions.add("hltScoutingEgammaProducer", desc);
 }
 
