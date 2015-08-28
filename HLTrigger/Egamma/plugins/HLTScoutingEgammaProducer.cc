@@ -91,7 +91,7 @@ HLTScoutingEgammaProducer::HLTScoutingEgammaProducer(const edm::ParameterSet& iC
     HcalPFClusterIsoMap_(consumes<RecoEcalCandMap>(iConfig.getParameter<edm::InputTag>(
 						       "HcalPFClusterIsoMap"))),
     egammaPtCut(iConfig.getParameter<double>("egammaPtCut")),
-    egammaEtaCut(iConfig.getParameter<double>("egammaEtaCut")),
+    egammaEtaCut(iConfig.getParameter<double>("egammaEtaCut"))
 {
     //register products
     produces<ScoutingElectronCollection>();
@@ -206,9 +206,9 @@ void HLTScoutingEgammaProducer::produce(edm::StreamID sid, edm::Event & iEvent, 
 	if (candidateRef.isNull() && !candidateRef.isAvailable())
 	    continue;
 
-	if (candidate.pt() < electronPtCut)
+	if (candidate.pt() < egammaPtCut)
 	    continue;
-	if (fabs(candidate.eta()) > electronEtaCut)
+	if (fabs(candidate.eta()) > egammaEtaCut)
 	    continue;
 
 	reco::SuperClusterRef scRef = candidate.superCluster();
