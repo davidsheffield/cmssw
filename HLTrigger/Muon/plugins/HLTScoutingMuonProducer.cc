@@ -16,6 +16,7 @@ Description: Producer for ScoutingElectron
 
 // system include files
 #include <memory>
+#include <algorithm>
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -27,6 +28,8 @@ Description: Producer for ScoutingElectron
 #include "DataFormats/Common/interface/AssociationMap.h"
 #include "DataFormats/Common/interface/getRef.h"
 #include "DataFormats/Common/interface/ValueMap.h"
+#include "DataFormats/MuonReco/interface/Muon.h"
+#include "DataFormats/MuonReco/interface/MuonFwd.h"
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidateFwd.h"
 #include "DataFormats/TrackReco/interface/HitPattern.h"
@@ -34,6 +37,8 @@ Description: Producer for ScoutingElectron
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 
 #include "DataFormats/Scouting/interface/ScoutingMuon.h"
+
+bool sort_muons(ScoutingMuon a, ScoutingMuon b) { return a.pt() > b.pt(); }
 
 class HLTScoutingMuonProducer : public edm::global::EDProducer<> {
     typedef edm::AssociationMap<edm::OneToValue<std::vector<reco::RecoChargedCandidate>, float,
@@ -49,6 +54,7 @@ class HLTScoutingMuonProducer : public edm::global::EDProducer<> {
 	    const override final;
 
         const edm::EDGetTokenT<reco::RecoChargedCandidateCollection> ChargedCandidateCollection_;
+        const edm::EDGetTokenT<reco::MuonCollection> TrackerMuonCollection_;
         const edm::EDGetTokenT<reco::TrackCollection> TrackCollection_;
         const edm::EDGetTokenT<RecoChargedCandMap> EcalPFClusterIsoMap_;
         const edm::EDGetTokenT<RecoChargedCandMap> HcalPFClusterIsoMap_;
@@ -64,6 +70,8 @@ class HLTScoutingMuonProducer : public edm::global::EDProducer<> {
 HLTScoutingMuonProducer::HLTScoutingMuonProducer(const edm::ParameterSet& iConfig):
     ChargedCandidateCollection_(consumes<reco::RecoChargedCandidateCollection>
 				(iConfig.getParameter<edm::InputTag>("ChargedCandidates"))),
+    TrackerMuonCollection_(consumes<reco::MuonCollection>
+			   (iConfig.getParameter<edm::InputTag>("TrackerMuons"))),
     TrackCollection_(consumes<reco::TrackCollection>
 		     (iConfig.getParameter<edm::InputTag>("Tracks"))),
     EcalPFClusterIsoMap_(consumes<RecoChargedCandMap>(iConfig.getParameter<edm::InputTag>(
@@ -93,6 +101,14 @@ void HLTScoutingMuonProducer::produce(edm::StreamID sid, edm::Event & iEvent,
     if(!iEvent.getByToken(ChargedCandidateCollection_, ChargedCandidateCollection)){
         edm::LogError ("HLTScoutingMuonProducer")
 	    << "invalid collection: ChargedCandidateCollection" << "\n";
+        return;
+    }
+
+    // Get TrackerMuons
+    Handle<reco::MuonCollection> TrackerMuonCollection;
+    if(!iEvent.getByToken(TrackerMuonCollection_, TrackerMuonCollection)){
+        edm::LogError ("HLTScoutingMuonProducer")
+	    << "invalid collection: tracker MuonCollection" << "\n";
         return;
     }
 
@@ -156,6 +172,45 @@ void HLTScoutingMuonProducer::produce(edm::StreamID sid, edm::Event & iEvent,
 			       track->hitPattern().trackerLayersWithMeasurement());
     }
 
+    for (auto &muon : *TrackerMuonCollection) {
+	if (!muon.isTrackerMuon())
+	    continue;
+	if (muon.pt() < muonPtCut)
+	    continue;
+	if (fabs(muon.eta()) > muonEtaCut)
+	    continue;
+
+	/*bool duplicate = false;
+	for (auto &out_muon : *outMuons) {
+	    if (static_cast<float>(muon.pt()) == out_muon.pt()
+		&& static_cast<float>(muon.eta()) == out_muon.eta()
+		&& static_cast<float>(muon.phi()) == out_muon.phi()) {
+		duplicate = true;
+		break;
+	    } else if (muon.pt() < out_muon.pt()) {
+		break;
+	    }
+	}
+	if (duplicate)
+	continue;*/
+
+	outMuons->emplace_back(muon.pt(), muon.eta(), muon.phi(),  muon.mass(),
+			       0, //(*EcalPFClusterIsoMap)[muonRef],
+			       0, //(*HcalPFClusterIsoMap)[muonRef],
+			       0, //(*TrackIsoMap)[muonRef],
+			       muon.track()->chi2(),
+			       muon.track()->ndof(),
+			       muon.track()->charge(),
+			       muon.track()->dxy(),
+			       muon.track()->dz(),
+			       muon.track()->hitPattern().numberOfValidMuonHits(), // Should be 0
+			       muon.track()->hitPattern().numberOfValidPixelHits(),
+			       muon.numberOfMatchedStations(), // nMatchedStations
+			       muon.track()->hitPattern().trackerLayersWithMeasurement());
+    }
+
+    std::sort(outMuons->begin(), outMuons->end(), sort_muons);
+
     // Put output
     iEvent.put(outMuons);
 }
@@ -164,12 +219,13 @@ void HLTScoutingMuonProducer::produce(edm::StreamID sid, edm::Event & iEvent,
 void HLTScoutingMuonProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     edm::ParameterSetDescription desc;
     desc.add<edm::InputTag>("ChargedCandidates", edm::InputTag("hltL3MuonCandidates"));
+    desc.add<edm::InputTag>("TrackerMuons", edm::InputTag("hltMuons"));
     desc.add<edm::InputTag>("Tracks", edm::InputTag("hltL3Muons"));
     desc.add<edm::InputTag>("EcalPFClusterIsoMap", edm::InputTag("hltMuonEcalPFClusterIsoForMuons"));
     desc.add<edm::InputTag>("HcalPFClusterIsoMap", edm::InputTag("hltMuonHcalPFClusterIsoForMuons"));
     desc.add<edm::InputTag>("TrackIsoMap", edm::InputTag(
 				"hltMuonTkRelIsolationCut0p09Map:combinedRelativeIsoDeposits"));
-    desc.add<double>("muonPtCut", 10.0);
+    desc.add<double>("muonPtCut", 5.0);
     desc.add<double>("muonEtaCut", 2.4);
     descriptions.add("scoutingMuonProducer", desc);
 }
