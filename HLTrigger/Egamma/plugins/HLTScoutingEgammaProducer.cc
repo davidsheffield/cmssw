@@ -206,6 +206,8 @@ void HLTScoutingEgammaProducer::produce(edm::StreamID sid, edm::Event & iEvent, 
 	if (candidateRef.isNull() && !candidateRef.isAvailable())
 	    continue;
 
+	if ((*HoverEMap)[candidateRef] > 1.0)
+	    continue;
 	if (candidate.pt() < egammaPtCut)
 	    continue;
 	if (fabs(candidate.eta()) > egammaEtaCut)
@@ -273,7 +275,7 @@ void HLTScoutingEgammaProducer::fillDescriptions(edm::ConfigurationDescriptions&
     desc.add<edm::InputTag>("EcalPFClusterIsoMap", edm::InputTag("hltEgammaEcalPFClusterIso"));
     desc.add<edm::InputTag>("EleGsfTrackIsoMap", edm::InputTag("hltEgammaEleGsfTrackIso"));
     desc.add<edm::InputTag>("HcalPFClusterIsoMap", edm::InputTag("hltEgammaHcalPFClusterIso"));
-    desc.add<double>("egammaPtCut", 10.0);
+    desc.add<double>("egammaPtCut", 4.0);
     desc.add<double>("egammaEtaCut", 2.5);
     descriptions.add("hltScoutingEgammaProducer", desc);
 }
