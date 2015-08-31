@@ -230,17 +230,12 @@ void HLTScoutingEgammaProducer::produce(edm::StreamID sid, edm::Event & iEvent, 
 		charge = track.charge();
 	    }
 	}
-	if (charge == -999 // No associated track
-	    || (*MissingHitsMap)[candidateRef] > 0) { // Candidate is a scouting photon
+	if (charge == -999) { // No associated track. Candidate is a scouting photon
 	    outPhotons->emplace_back(candidate.pt(), candidate.eta(), candidate.phi(),
-				     candidate.mass(), d0, dz, (*DetaMap)[candidateRef],
-				     (*DphiMap)[candidateRef], (*SigmaIEtaIEtaMap)[candidateRef],
+				     candidate.mass(), (*SigmaIEtaIEtaMap)[candidateRef],
 				     (*HoverEMap)[candidateRef],
-				     (*OneOEMinusOneOPMap)[candidateRef],
-				     (*MissingHitsMap)[candidateRef], 0, // Charge = 0
 				     (*EcalPFClusterIsoMap)[candidateRef],
-				     (*HcalPFClusterIsoMap)[candidateRef],
-				     (*EleGsfTrackIsoMap)[candidateRef]);
+				     (*HcalPFClusterIsoMap)[candidateRef]);
 	} else { // Candidate is a scouting electron
 	    outElectrons->emplace_back(candidate.pt(), candidate.eta(), candidate.phi(),
 				       candidate.mass(), d0, dz, (*DetaMap)[candidateRef],
