@@ -170,7 +170,7 @@ void HLTScoutingMuonProducer::fillDescriptions(edm::ConfigurationDescriptions& d
     desc.add<edm::InputTag>("HcalPFClusterIsoMap", edm::InputTag("hltMuonHcalPFClusterIsoForMuons"));
     desc.add<edm::InputTag>("TrackIsoMap", edm::InputTag(
 				"hltMuonTkRelIsolationCut0p09Map:combinedRelativeIsoDeposits"));
-    desc.add<double>("muonPtCut", 10.0);
+    desc.add<double>("muonPtCut", 4.0);
     desc.add<double>("muonEtaCut", 2.4);
     descriptions.add("scoutingMuonProducer", desc);
 }
