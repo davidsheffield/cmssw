@@ -153,7 +153,8 @@ void HLTScoutingMuonProducer::produce(edm::StreamID sid, edm::Event & iEvent,
 			       track->hitPattern().numberOfValidMuonHits(),
 			       track->hitPattern().numberOfValidPixelHits(),
 			       0, // nMatchedStations
-			       track->hitPattern().trackerLayersWithMeasurement());
+			       track->hitPattern().trackerLayersWithMeasurement(),
+			       2); // Global muon
     }
 
     // Put output
