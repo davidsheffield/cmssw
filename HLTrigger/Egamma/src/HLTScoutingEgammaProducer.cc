@@ -56,10 +56,15 @@ void HLTScoutingEgammaProducer::produce(edm::StreamID sid, edm::Event & iEvent, 
 {
     using namespace edm;
 
+    std::unique_ptr<ScoutingElectronCollection> outElectrons(new ScoutingElectronCollection());
+    std::unique_ptr<ScoutingPhotonCollection> outPhotons(new ScoutingPhotonCollection());
+
     // Get RecoEcalCandidate
     Handle<reco::RecoEcalCandidateCollection> EgammaCandidateCollection;
     if(!iEvent.getByToken(EgammaCandidateCollection_,
                           EgammaCandidateCollection)){
+        iEvent.put(std::move(outElectrons));
+        iEvent.put(std::move(outPhotons));
         return;
     }
 
@@ -67,66 +72,84 @@ void HLTScoutingEgammaProducer::produce(edm::StreamID sid, edm::Event & iEvent, 
     Handle<reco::GsfTrackCollection> EgammaGsfTrackCollection;
     if(!iEvent.getByToken(EgammaGsfTrackCollection_,
                           EgammaGsfTrackCollection)){
+        iEvent.put(std::move(outElectrons));
+        iEvent.put(std::move(outPhotons));
         return;
     }
 
     // Get SigmaIEtaIEtaMap
     Handle<RecoEcalCandMap> SigmaIEtaIEtaMap;
     if(!iEvent.getByToken(SigmaIEtaIEtaMap_, SigmaIEtaIEtaMap)){
+        iEvent.put(std::move(outElectrons));
+        iEvent.put(std::move(outPhotons));
         return;
     }
 
     // Get HoverEMap
     Handle<RecoEcalCandMap> HoverEMap;
     if(!iEvent.getByToken(HoverEMap_, HoverEMap)){
+        iEvent.put(std::move(outElectrons));
+        iEvent.put(std::move(outPhotons));
         return;
     }
 
     // Get DetaMap
     Handle<RecoEcalCandMap> DetaMap;
     if(!iEvent.getByToken(DetaMap_, DetaMap)){
+        iEvent.put(std::move(outElectrons));
+        iEvent.put(std::move(outPhotons));
         return;
     }
 
     // Get DphiMap
     Handle<RecoEcalCandMap> DphiMap;
     if(!iEvent.getByToken(DphiMap_, DphiMap)){
+        iEvent.put(std::move(outElectrons));
+        iEvent.put(std::move(outPhotons));
         return;
     }
 
     // Get MissingHitsMap
     Handle<RecoEcalCandMap> MissingHitsMap;
     if(!iEvent.getByToken(MissingHitsMap_, MissingHitsMap)){
+        iEvent.put(std::move(outElectrons));
+        iEvent.put(std::move(outPhotons));
         return;
     }
 
     // Get 1/E - 1/p Map
     Handle<RecoEcalCandMap> OneOEMinusOneOPMap;
     if(!iEvent.getByToken(OneOEMinusOneOPMap_, OneOEMinusOneOPMap)){
+        iEvent.put(std::move(outElectrons));
+        iEvent.put(std::move(outPhotons));
         return;
     }
 
     // Get EcalPFClusterIsoMap
     Handle<RecoEcalCandMap> EcalPFClusterIsoMap;
     if(!iEvent.getByToken(EcalPFClusterIsoMap_, EcalPFClusterIsoMap)){
+        iEvent.put(std::move(outElectrons));
+        iEvent.put(std::move(outPhotons));
         return;
     }
 
     // Get EleGsfTrackIsoMap
     Handle<RecoEcalCandMap> EleGsfTrackIsoMap;
     if(!iEvent.getByToken(EleGsfTrackIsoMap_, EleGsfTrackIsoMap)){
+        iEvent.put(std::move(outElectrons));
+        iEvent.put(std::move(outPhotons));
         return;
     }
 
     // Get HcalPFClusterIsoMap
     Handle<RecoEcalCandMap> HcalPFClusterIsoMap;
     if(!iEvent.getByToken(HcalPFClusterIsoMap_, HcalPFClusterIsoMap)){
+        iEvent.put(std::move(outElectrons));
+        iEvent.put(std::move(outPhotons));
         return;
     }
 
     // Produce electrons and photons
-    std::unique_ptr<ScoutingElectronCollection> outElectrons(new ScoutingElectronCollection());
-    std::unique_ptr<ScoutingPhotonCollection> outPhotons(new ScoutingPhotonCollection());
     int index = 0;
     for (auto &candidate : *EgammaCandidateCollection) {
         reco::RecoEcalCandidateRef candidateRef = getRef(EgammaCandidateCollection, index);
