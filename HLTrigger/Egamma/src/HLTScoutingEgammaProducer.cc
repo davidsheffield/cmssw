@@ -60,8 +60,6 @@ void HLTScoutingEgammaProducer::produce(edm::StreamID sid, edm::Event & iEvent, 
     Handle<reco::RecoEcalCandidateCollection> EgammaCandidateCollection;
     if(!iEvent.getByToken(EgammaCandidateCollection_,
                           EgammaCandidateCollection)){
-        edm::LogError ("HLTScoutingEgammaProducer")
-            << "invalid collection: EgammaCandidateCollection" << "\n";
         return;
     }
 
@@ -69,80 +67,60 @@ void HLTScoutingEgammaProducer::produce(edm::StreamID sid, edm::Event & iEvent, 
     Handle<reco::GsfTrackCollection> EgammaGsfTrackCollection;
     if(!iEvent.getByToken(EgammaGsfTrackCollection_,
                           EgammaGsfTrackCollection)){
-        edm::LogError ("HLTScoutingEgammaProducer")
-            << "invalid collection: EgammaGsfTrackCollection" << "\n";
         return;
     }
 
     // Get SigmaIEtaIEtaMap
     Handle<RecoEcalCandMap> SigmaIEtaIEtaMap;
     if(!iEvent.getByToken(SigmaIEtaIEtaMap_, SigmaIEtaIEtaMap)){
-        edm::LogError ("HLTScoutingEgammaProducer")
-            << "invalid collection: hltEgammaClusterShape:sigmaIEtaIEta5x5" << "\n";
         return;
     }
 
     // Get HoverEMap
     Handle<RecoEcalCandMap> HoverEMap;
     if(!iEvent.getByToken(HoverEMap_, HoverEMap)){
-        edm::LogError ("HLTScoutingEgammaProducer")
-            << "invalid collection: hltEgammaHoverE" << "\n";
         return;
     }
 
     // Get DetaMap
     Handle<RecoEcalCandMap> DetaMap;
     if(!iEvent.getByToken(DetaMap_, DetaMap)){
-        edm::LogError ("HLTScoutingEgammaProducer")
-            << "invalid collection: hltEgammaGsfTrackVars:Deta" << "\n";
         return;
     }
 
     // Get DphiMap
     Handle<RecoEcalCandMap> DphiMap;
     if(!iEvent.getByToken(DphiMap_, DphiMap)){
-        edm::LogError ("HLTScoutingEgammaProducer")
-            << "invalid collection: hltEgammaGsfTrackVars:Dphi" << "\n";
         return;
     }
 
     // Get MissingHitsMap
     Handle<RecoEcalCandMap> MissingHitsMap;
     if(!iEvent.getByToken(MissingHitsMap_, MissingHitsMap)){
-        edm::LogError ("HLTScoutingEgammaProducer")
-            << "invalid collection: hltEgammaGsfTrackVars:MissingHits" << "\n";
         return;
     }
 
     // Get 1/E - 1/p Map
     Handle<RecoEcalCandMap> OneOEMinusOneOPMap;
     if(!iEvent.getByToken(OneOEMinusOneOPMap_, OneOEMinusOneOPMap)){
-        edm::LogError ("HLTScoutingEgammaProducer")
-            << "invalid collection: hltEgammaGsfTrackVars:OneOESuperMinusOneOP" << "\n";
         return;
     }
 
     // Get EcalPFClusterIsoMap
     Handle<RecoEcalCandMap> EcalPFClusterIsoMap;
     if(!iEvent.getByToken(EcalPFClusterIsoMap_, EcalPFClusterIsoMap)){
-        edm::LogError ("HLTScoutingEgammaProducer")
-            << "invalid collection: hltEgammaEcalPFClusterIso" << "\n";
         return;
     }
 
     // Get EleGsfTrackIsoMap
     Handle<RecoEcalCandMap> EleGsfTrackIsoMap;
     if(!iEvent.getByToken(EleGsfTrackIsoMap_, EleGsfTrackIsoMap)){
-        edm::LogError ("HLTScoutingEgammaProducer")
-            << "invalid collection: hltEgammaEleGsfTrackIso" << "\n";
         return;
     }
 
     // Get HcalPFClusterIsoMap
     Handle<RecoEcalCandMap> HcalPFClusterIsoMap;
     if(!iEvent.getByToken(HcalPFClusterIsoMap_, HcalPFClusterIsoMap)){
-        edm::LogError ("HLTScoutingEgammaProducer")
-            << "invalid collection: HcalPFClusterIso" << "\n";
         return;
     }
 

@@ -49,40 +49,30 @@ void HLTScoutingMuonProducer::produce(edm::StreamID sid, edm::Event & iEvent,
     // Get RecoChargedCandidate
     Handle<reco::RecoChargedCandidateCollection> ChargedCandidateCollection;
     if(!iEvent.getByToken(ChargedCandidateCollection_, ChargedCandidateCollection)){
-        edm::LogError ("HLTScoutingMuonProducer")
-            << "invalid collection: ChargedCandidateCollection" << "\n";
         return;
     }
 
     // Get Track
     Handle<reco::TrackCollection> TrackCollection;
     if(!iEvent.getByToken(TrackCollection_, TrackCollection)){
-        edm::LogError ("HLTScoutingMuonProducer")
-            << "invalid collection: TrackCollection" << "\n";
         return;
     }
 
     // Get EcalPFClusterIsoMap
     Handle<RecoChargedCandMap> EcalPFClusterIsoMap;
     if(!iEvent.getByToken(EcalPFClusterIsoMap_, EcalPFClusterIsoMap)){
-        edm::LogError ("HLTScoutingMuonProducer")
-            << "invalid collection: hltMuonEcalPFClusterIsoForMuons" << "\n";
         return;
     }
 
     // Get HcalPFClusterIsoMap
     Handle<RecoChargedCandMap> HcalPFClusterIsoMap;
     if(!iEvent.getByToken(HcalPFClusterIsoMap_, HcalPFClusterIsoMap)){
-        edm::LogError ("HLTScoutingMuonProducer")
-            << "invalid collection: hltMuonHcalPFClusterIsoForMuons" << "\n";
         return;
     }
 
     // Get TrackIsoMap
     Handle<ValueMap<double>> TrackIsoMap;
     if(!iEvent.getByToken(TrackIsoMap_, TrackIsoMap)){
-        edm::LogError ("HLTScoutingMuonProducer")
-            << "invalid collection: TrackIsoMap" << "\n";
         return;
     }
 
